@@ -42,7 +42,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         String subsystemXml =
                 "<subsystem xmlns=\"" + SimplePushExtension.NAMESPACE + "\">" +
                         "   <simplepush-server>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
+                        "       <deployment-type suffix=\"tst\" port=\"7777\"/>" +
                         "   </simplepush-server>" +
                         "</subsystem>";
         List<ModelNode> operations = super.parse(subsystemXml);
@@ -63,7 +63,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Then we will get the add type operation
         ModelNode addType = operations.get(1);
         Assert.assertEquals(ADD, addType.get(OP).asString());
-        Assert.assertEquals(12345, addType.get("tick").asLong());
+        Assert.assertEquals(7777, addType.get("port").asInt());
         addr = PathAddress.pathAddress(addType.get(OP_ADDR));
         Assert.assertEquals(2, addr.size());
         element = addr.getElement(0);
@@ -79,24 +79,20 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
      */
     @Test
     public void testInstallIntoController() throws Exception {
-        //Parse the subsystem xml and install into the controller
-        String subsystemXml =
+        final String subsystemXml =
                 "<subsystem xmlns=\"" + SimplePushExtension.NAMESPACE + "\">" +
                         "   <simplepush-server>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
+                        "       <deployment-type suffix=\"tst\" port=\"7777\"/>" +
                         "   </simplepush-server>" +
                         "</subsystem>";
-        KernelServices services = super.installInController(subsystemXml);
+        final KernelServices services = super.installInController(subsystemXml);
 
-        //Read the whole model and make sure it looks as expected
-        ModelNode model = services.readWholeModel();
-        //Useful for debugging :-)
-        //System.out.println(model);
+        final ModelNode model = services.readWholeModel();
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(SimplePushExtension.SUBSYSTEM_NAME));
         Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME).hasDefined("type"));
         Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type").hasDefined("tst"));
-        Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("tick"));
-        Assert.assertEquals(12345, model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "tst", "tick").asLong());
+        Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("port"));
+        Assert.assertEquals(7777, model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "tst", "port").asInt());
     }
 
     /**
@@ -105,21 +101,20 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
      */
     @Test
     public void testParseAndMarshalModel() throws Exception {
-        //Parse the subsystem xml and install into the first controller
-        String subsystemXml =
+        final String subsystemXml =
                 "<subsystem xmlns=\"" + SimplePushExtension.NAMESPACE + "\">" +
                         "   <simplepush-server>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
+                        "       <deployment-type suffix=\"tst\" port=\"7777\"/>" +
                         "   </simplepush-server>" +
                         "</subsystem>";
-        KernelServices servicesA = super.installInController(subsystemXml);
+        final KernelServices servicesA = super.installInController(subsystemXml);
         //Get the model and the persisted xml from the first controller
-        ModelNode modelA = servicesA.readWholeModel();
-        String marshalled = servicesA.getPersistedSubsystemXml();
+        final ModelNode modelA = servicesA.readWholeModel();
+        final String marshalled = servicesA.getPersistedSubsystemXml();
 
         //Install the persisted xml from the first controller into a second controller
-        KernelServices servicesB = super.installInController(marshalled);
-        ModelNode modelB = servicesB.readWholeModel();
+        final KernelServices servicesB = super.installInController(marshalled);
+        final ModelNode modelB = servicesB.readWholeModel();
 
         //Make sure the models from the two controllers are identical
         super.compare(modelA, modelB);
@@ -131,23 +126,22 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
      */
     @Test
     public void testDescribeHandler() throws Exception {
-        //Parse the subsystem xml and install into the first controller
-        String subsystemXml =
+        final String subsystemXml =
                 "<subsystem xmlns=\"" + SimplePushExtension.NAMESPACE + "\">" +
                         "</subsystem>";
-        KernelServices servicesA = super.installInController(subsystemXml);
-        //Get the model and the describe operations from the first controller
-        ModelNode modelA = servicesA.readWholeModel();
-        ModelNode describeOp = new ModelNode();
+        final KernelServices servicesA = super.installInController(subsystemXml);
+        
+        final ModelNode modelA = servicesA.readWholeModel();
+        final ModelNode describeOp = new ModelNode();
         describeOp.get(OP).set(DESCRIBE);
         describeOp.get(OP_ADDR).set(
                 PathAddress.pathAddress(
                         PathElement.pathElement(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME)).toModelNode());
-        List<ModelNode> operations = super.checkResultAndGetContents(servicesA.executeOperation(describeOp)).asList();
+        final List<ModelNode> operations = super.checkResultAndGetContents(servicesA.executeOperation(describeOp)).asList();
 
         //Install the describe options from the first controller into a second controller
-        KernelServices servicesB = super.installInController(operations);
-        ModelNode modelB = servicesB.readWholeModel();
+        final KernelServices servicesB = super.installInController(operations);
+        final ModelNode modelB = servicesB.readWholeModel();
 
         //Make sure the models from the two controllers are identical
         super.compare(modelA, modelB);
@@ -159,14 +153,13 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
      */
     @Test
     public void testSubsystemRemoval() throws Exception {
-        //Parse the subsystem xml and install into the first controller
-        String subsystemXml =
+        final String subsystemXml =
                 "<subsystem xmlns=\"" + SimplePushExtension.NAMESPACE + "\">" +
                         "   <simplepush-server>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
+                        "       <deployment-type suffix=\"tst\" port=\"12345\"/>" +
                         "   </simplepush-server>" +
                         "</subsystem>";
-        KernelServices services = super.installInController(subsystemXml);
+        final KernelServices services = super.installInController(subsystemXml);
 
         //Sanity check to test the service for 'tst' was there
         services.getContainer().getRequiredService(SimplePushService.createServiceName("tst"));
@@ -184,55 +177,55 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
     @Test
     public void testExecuteOperations() throws Exception {
-        String subsystemXml =
+        final String subsystemXml =
                 "<subsystem xmlns=\"" + SimplePushExtension.NAMESPACE + "\">" +
                         "   <simplepush-server>" +
-                        "       <deployment-type suffix=\"tst\" tick=\"12345\"/>" +
+                        "       <deployment-type suffix=\"tst\" port=\"12345\"/>" +
                         "   </simplepush-server>" +
                         "</subsystem>";
-        KernelServices services = super.installInController(subsystemXml);
+        final KernelServices services = super.installInController(subsystemXml);
 
         //Add another type
-        PathAddress fooTypeAddr = PathAddress.pathAddress(
+        final PathAddress fooTypeAddr = PathAddress.pathAddress(
                 PathElement.pathElement(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME),
                 PathElement.pathElement("type", "foo"));
-        ModelNode addOp = new ModelNode();
+        final ModelNode addOp = new ModelNode();
         addOp.get(OP).set(ADD);
         addOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        addOp.get("tick").set(1000);
+        addOp.get("port").set(1000);
         ModelNode result = services.executeOperation(addOp);
         Assert.assertEquals(SUCCESS, result.get(OUTCOME).asString());
 
 
-        ModelNode model = services.readWholeModel();
+        final ModelNode model = services.readWholeModel();
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(SimplePushExtension.SUBSYSTEM_NAME));
         Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME).hasDefined("type"));
         Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type").hasDefined("tst"));
-        Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("tick"));
-        Assert.assertEquals(12345, model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "tst", "tick").asLong());
+        Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "tst").hasDefined("port"));
+        Assert.assertEquals(12345, model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "tst", "port").asLong());
 
         Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type").hasDefined("foo"));
-        Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "foo").hasDefined("tick"));
-        Assert.assertEquals(1000, model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "foo", "tick").asLong());
+        Assert.assertTrue(model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "foo").hasDefined("port"));
+        Assert.assertEquals(1000, model.get(SUBSYSTEM, SimplePushExtension.SUBSYSTEM_NAME, "type", "foo", "port").asLong());
 
         //Call write-attribute
-        ModelNode writeOp = new ModelNode();
+        final ModelNode writeOp = new ModelNode();
         writeOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
         writeOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        writeOp.get(NAME).set("tick");
+        writeOp.get(NAME).set("port");
         writeOp.get(VALUE).set(3456);
         result = services.executeOperation(writeOp);
         Assert.assertEquals(SUCCESS, result.get(OUTCOME).asString());
 
         //Check that write attribute took effect, this time by calling read-attribute instead of reading the whole model
-        ModelNode readOp = new ModelNode();
+        final ModelNode readOp = new ModelNode();
         readOp.get(OP).set(READ_ATTRIBUTE_OPERATION);
         readOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        readOp.get(NAME).set("tick");
+        readOp.get(NAME).set("port");
         result = services.executeOperation(readOp);
         Assert.assertEquals(3456, checkResultAndGetContents(result).asLong());
 
-        SimplePushService service = (SimplePushService) services.getContainer().getService(SimplePushService.createServiceName("foo")).getValue();
-        Assert.assertEquals(3456, service.getTick());
+        final SimplePushService service = (SimplePushService) services.getContainer().getService(SimplePushService.createServiceName("foo")).getValue();
+        Assert.assertEquals(3456, service.getPort());
     }
 }

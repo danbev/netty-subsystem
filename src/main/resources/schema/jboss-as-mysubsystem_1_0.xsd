@@ -15,6 +15,6 @@
     </xs:complexType>
     <xs:complexType name="deployment-typeType">
         <xs:attribute name="suffix" use="required"/>
-        <xs:attribute name="tick" type="xs:long" use="optional" default="10000"/>
+        <xs:attribute name="port" type="xs:long" use="optional" default="10000"/>
     </xs:complexType>
 </xs:schema>

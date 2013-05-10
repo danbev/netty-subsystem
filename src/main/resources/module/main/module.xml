@@ -2,6 +2,7 @@
     <resources>
         <resource-root path="simplepush-subsystem.jar"/>
         <resource-root path="aerogear-simplepush-server.jar"/>
+        <resource-root path="netty-all.jar"/>
         <resource-root path="slf4j-api.jar"/>
         <resource-root path="slf4j-simple.jar"/>
         <resource-root path="jackson-core-asl.jar"/>

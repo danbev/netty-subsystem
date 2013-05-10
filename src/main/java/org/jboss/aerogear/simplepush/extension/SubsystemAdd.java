@@ -14,11 +14,6 @@ import org.jboss.msc.service.ServiceController;
 
 import org.jboss.aerogear.simplepush.deployment.SubsystemDeploymentProcessor;
 
-/**
- * Handler responsible for adding the subsystem resource to the model
- *
- * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
- */
 class SubsystemAdd extends AbstractBoottimeAddStepHandler {
 
     static final SubsystemAdd INSTANCE = new SubsystemAdd();

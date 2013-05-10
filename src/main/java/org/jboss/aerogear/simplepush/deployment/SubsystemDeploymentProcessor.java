@@ -31,6 +31,7 @@ public class SubsystemDeploymentProcessor implements DeploymentUnitProcessor {
 
     @Override
     public void deploy(final DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
+        /*
         final String name = phaseContext.getDeploymentUnit().getName();
         final ResourceRoot root = phaseContext.getDeploymentUnit().getAttachment(Attachments.DEPLOYMENT_ROOT);
         final SimplePushService service = getSimplePushService(phaseContext.getServiceRegistry(), name);
@@ -41,16 +42,19 @@ public class SubsystemDeploymentProcessor implements DeploymentUnitProcessor {
                 service.addCoolDeployment(name);
             }
         }
+        */
     }
 
     @Override
     public void undeploy(final DeploymentUnit context) {
+        /*
         context.getServiceRegistry();
         final String name = context.getName();
         final SimplePushService service = getSimplePushService(context.getServiceRegistry(), name);
         if (service != null) {
             service.removeDeployment(name);
         }
+        */
     }
 
     private SimplePushService getSimplePushService(final ServiceRegistry registry, final String name) {

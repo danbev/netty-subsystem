@@ -1,6 +1,6 @@
 package org.jboss.aerogear.simplepush.extension;
 
-import static org.jboss.aerogear.simplepush.extension.TypeDefinition.TICK;
+import static org.jboss.aerogear.simplepush.extension.TypeDefinition.PORT;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DEFAULT;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIPTION;
@@ -39,17 +39,18 @@ class TypeAdd extends AbstractAddStepHandler {
    
     @Override
     protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
-        TICK.validateAndSet(operation,model);
+        PORT.validateAndSet(operation,model);
     }
 
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
             ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
             throws OperationFailedException {
-        String suffix = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        long tick = TICK.resolveModelAttribute(context,model).asLong();
-        SimplePushService service = new SimplePushService(suffix, tick);
-        ServiceName name = SimplePushService.createServiceName(suffix);
+        final String suffix = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        final int port = PORT.resolveModelAttribute(context,model).asInt();
+        
+        final SimplePushService service = new SimplePushService(suffix, port);
+        final ServiceName name = SimplePushService.createServiceName(suffix);
         ServiceController<SimplePushService> controller = context.getServiceTarget()
                 .addService(name, service)
                 .addListener(verificationHandler)

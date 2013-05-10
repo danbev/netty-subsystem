@@ -1,5 +1,16 @@
 package org.jboss.aerogear.simplepush.extension;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
+
+import java.util.Collections;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+
 import org.jboss.as.controller.Extension;
 import org.jboss.as.controller.ExtensionContext;
 import org.jboss.as.controller.PathAddress;
@@ -7,29 +18,16 @@ import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.SubsystemRegistration;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.controller.descriptions.StandardResourceDescriptionResolver;
-import org.jboss.as.controller.operations.common.GenericSubsystemDescribeHandler;
 import org.jboss.as.controller.parsing.ExtensionParsingContext;
 import org.jboss.as.controller.parsing.ParseUtils;
 import org.jboss.as.controller.persistence.SubsystemMarshallingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.as.controller.registry.OperationEntry;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 import org.jboss.staxmapper.XMLElementReader;
 import org.jboss.staxmapper.XMLElementWriter;
 import org.jboss.staxmapper.XMLExtendedStreamReader;
 import org.jboss.staxmapper.XMLExtendedStreamWriter;
-
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import java.util.Collections;
-import java.util.List;
-
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIBE;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
 
 
 /**
@@ -55,7 +53,7 @@ public class SimplePushExtension implements Extension {
     private static final String RESOURCE_NAME = SimplePushExtension.class.getPackage().getName() + ".LocalDescriptions";
 
     protected static final String TYPE = "type";
-    protected static final String TICK = "tick";
+    protected static final String PORT = "port";
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
     protected static final PathElement TYPE_PATH = PathElement.pathElement(TYPE);
 
@@ -72,11 +70,9 @@ public class SimplePushExtension implements Extension {
     @Override
     public void initialize(ExtensionContext context) {
         final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, 1, 0);
-        final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(TrackerSubsystemDefinition.INSTANCE);
+        final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(SimplePushSubsystemDefinition.INSTANCE);
 
-
-        //Add the type child
-        ManagementResourceRegistration typeChild = registration.registerSubModel(TypeDefinition.INSTANCE);
+        registration.registerSubModel(TypeDefinition.INSTANCE);
         subsystem.registerXMLElementWriter(parser);
     }
 
@@ -121,8 +117,8 @@ public class SimplePushExtension implements Extension {
             for (int i = 0; i < reader.getAttributeCount(); i++) {
                 String attr = reader.getAttributeLocalName(i);
                 String value = reader.getAttributeValue(i);
-                if (attr.equals("tick")) {
-                    TypeDefinition.TICK.parseAndSetParameter(value, addTypeOperation, reader);
+                if (attr.equals("port")) {
+                    TypeDefinition.PORT.parseAndSetParameter(value, addTypeOperation, reader);
                 } else if (attr.equals("suffix")) {
                     suffix = value;
                 } else {
@@ -156,7 +152,7 @@ public class SimplePushExtension implements Extension {
                 writer.writeStartElement("deployment-type");
                 writer.writeAttribute("suffix", property.getName());
                 ModelNode entry = property.getValue();
-                TypeDefinition.TICK.marshallAsAttribute(entry, true, writer);
+                TypeDefinition.PORT.marshallAsAttribute(entry, true, writer);
                 writer.writeEndElement();
             }
             //End deployment-types
