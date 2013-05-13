@@ -11,6 +11,10 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OUTCOME;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUCCESS;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.VALUE;
 
 import java.util.List;
 
@@ -19,9 +23,8 @@ import org.jboss.as.controller.PathElement;
 import org.jboss.as.subsystem.test.AbstractSubsystemTest;
 import org.jboss.as.subsystem.test.KernelServices;
 import org.jboss.dmr.ModelNode;
-import org.junit.Assert;
+import org.jboss.msc.service.ServiceNotFoundException;
 import org.junit.Test;
-
 
 public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     
@@ -65,8 +68,8 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(firstPathElement.getKey(), equalTo(SUBSYSTEM));
         assertThat(firstPathElement.getValue(), equalTo(NettyExtension.SUBSYSTEM_NAME));
         final PathElement secondPathElement = addr.getElement(1);
-        Assert.assertEquals("server", secondPathElement.getKey());
-        Assert.assertEquals("simplepush", secondPathElement.getValue());
+        assertThat(secondPathElement.getKey(), equalTo("server"));
+        assertThat(secondPathElement.getValue(), equalTo("simplepush"));
     }
 
     @Test
@@ -122,16 +125,12 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
     }
 
-    @Test
+    @Test (expected = ServiceNotFoundException.class)
     public void subsystemRemoval() throws Exception {
         final KernelServices services = super.installInController(subsystemXml);
         services.getContainer().getRequiredService(NettyService.createServiceName("simplepush"));
         super.assertRemoveSubsystemResources(services);
-        try {
-            services.getContainer().getRequiredService(NettyService.createServiceName("simplepush"));
-            Assert.fail("Should have removed services");
-        } catch (Exception expected) {
-        }
+        services.getContainer().getRequiredService(NettyService.createServiceName("simplepush"));
     }
 
     @Test 
@@ -163,25 +162,23 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "port").asInt(), is(1000));
 
         //Call write-attribute
-        /*
         final ModelNode writeOp = new ModelNode();
         writeOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
         writeOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
         writeOp.get(NAME).set("port");
         writeOp.get(VALUE).set(3456);
-        result = services.executeOperation(writeOp);
-        Assert.assertEquals(SUCCESS, result.get(OUTCOME).asString());
+        final ModelNode result2 = services.executeOperation(writeOp);
+        assertThat(result2.get(OUTCOME).asString(), is(SUCCESS));
 
         //Check that write attribute took effect, this time by calling read-attribute instead of reading the whole model
         final ModelNode readOp = new ModelNode();
         readOp.get(OP).set(READ_ATTRIBUTE_OPERATION);
         readOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
         readOp.get(NAME).set("port");
-        result = services.executeOperation(readOp);
-        Assert.assertEquals(3456, checkResultAndGetContents(result).asLong());
+        final ModelNode result3 = services.executeOperation(readOp);
+        assertThat(checkResultAndGetContents(result3).asLong(), is(3456L));
 
-        final SimplePushService service = (SimplePushService) services.getContainer().getService(SimplePushService.createServiceName("foo")).getValue();
-        Assert.assertEquals(3456, service.getPort());
-        */
+        final NettyService service = (NettyService) services.getContainer().getService(NettyService.createServiceName("foo")).getValue();
+        assertThat(service.getPort(), is(3456));
     }
 }
