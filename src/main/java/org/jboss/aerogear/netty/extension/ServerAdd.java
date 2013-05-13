@@ -1,10 +1,10 @@
 package org.jboss.aerogear.netty.extension;
 
-import io.netty.channel.ChannelInitializer;
+import io.netty.bootstrap.ServerBootstrap;
 
 import java.util.List;
 
-import org.jboss.aerogear.netty.extension.api.ChannelInitializerFactory;
+import org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory;
 import org.jboss.as.controller.AbstractAddStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
@@ -37,11 +37,11 @@ class ServerAdd extends AbstractAddStepHandler {
             final List<ServiceController<?>> newControllers) throws OperationFailedException {
         
         final String factoryClass = ServerDefinition.FACTORY_CLASS.resolveModelAttribute(context, model).asString();
-        final ChannelInitializer<?> channelInitializer = createChannelInitializer(factoryClass);
+        final ServerBootstrap serverBootstrap = createServerBootstrap(factoryClass);
         final int port = ServerDefinition.PORT.resolveModelAttribute(context, model).asInt();
         final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         
-        final NettyService service = new NettyService(serverName, port, channelInitializer);
+        final NettyService service = new NettyService(serverName, port, serverBootstrap);
         
         final ServiceName name = NettyService.createServiceName(serverName);
         final ServiceController<NettyService> controller = context.getServiceTarget()
@@ -52,11 +52,11 @@ class ServerAdd extends AbstractAddStepHandler {
         newControllers.add(controller);
     }
     
-    private ChannelInitializer<?> createChannelInitializer(final String factoryClass) throws OperationFailedException {
+    private ServerBootstrap createServerBootstrap(final String factoryClass) throws OperationFailedException {
         try {
             final Class<?> type = Class.forName(factoryClass);
-            final ChannelInitializerFactory factory = (ChannelInitializerFactory) type.newInstance();
-            return factory.createChannelInitializer();
+            final ServerBootstrapFactory factory = (ServerBootstrapFactory) type.newInstance();
+            return factory.createServerBootstrap();
         } catch (final ClassNotFoundException e) {
             throw new OperationFailedException(e.getMessage());
         } catch (InstantiationException e) {

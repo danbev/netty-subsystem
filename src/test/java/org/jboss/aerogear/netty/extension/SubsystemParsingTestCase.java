@@ -31,7 +31,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     private final String subsystemXml =
                 "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
                         "   <netty>" +
-                        "       <server name=\"simplepush\" port=\"7777\" factoryClass=\"" + MockChannelInitFactory.class.getName() + "\"/>" +
+                        "       <server name=\"simplepush\" port=\"7777\" factoryClass=\"" + MockServerBootstrapFactory.class.getName() + "\"/>" +
                         "   </netty>" +
                         "</subsystem>";
 
@@ -60,7 +60,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         final ModelNode addType = operations.get(1);
         assertThat(addType.get(OP).asString(), equalTo(ADD));
         assertThat(addType.get(NettyExtension.PORT).asInt(), is(7777));
-        assertThat(addType.get(NettyExtension.FACTORY_CLASS).asString(), equalTo(MockChannelInitFactory.class.getName()));
+        assertThat(addType.get(NettyExtension.FACTORY_CLASS).asString(), equalTo(MockServerBootstrapFactory.class.getName()));
         
         final PathAddress addr = PathAddress.pathAddress(addType.get(OP_ADDR));
         assertThat(addr.size(), is(2));
@@ -83,7 +83,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("port"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("factoryClass"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "port").asInt(), is(7777));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "factoryClass").asString(), is(MockChannelInitFactory.class.getName()));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "factoryClass").asString(), is(MockServerBootstrapFactory.class.getName()));
     }
 
     @Test
@@ -144,8 +144,8 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         final ModelNode addOp = new ModelNode();
         addOp.get(OP).set(ADD);
         addOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        addOp.get("port").set(1000);
-        addOp.get("factoryClass").set(MockChannelInitFactory.class.getName());
+        addOp.get("port").set(9999);
+        addOp.get("factoryClass").set(MockServerBootstrapFactory.class.getName());
         final ModelNode result = services.executeOperation(addOp);
         assertThat(result.get(OUTCOME).asString(), equalTo(SUCCESS));
 
@@ -159,7 +159,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("foo"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo").hasDefined("port"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "port").asInt(), is(1000));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "port").asInt(), is(9999));
 
         //Call write-attribute
         final ModelNode writeOp = new ModelNode();

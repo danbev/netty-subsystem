@@ -2,11 +2,6 @@ package org.jboss.aerogear.netty.extension;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -22,62 +17,39 @@ public class NettyService implements Service<NettyService> {
     private final AtomicInteger port = new AtomicInteger(0);
     private final Logger logger = Logger.getLogger(NettyService.class);
 
-    private final EventLoopGroup bossGroup = new NioEventLoopGroup();
-    private final EventLoopGroup workerGroup = new NioEventLoopGroup();
-    private final ChannelInitializer<?> channelInitializer;
+    private final ServerBootstrap serverBootstrap;
     private final String name;
     private Channel channel;
 
-    private Thread OUTPUT = new Thread() {
-        @Override
-        public void run() {
-            try {
-                final ServerBootstrap sb = new ServerBootstrap();
-                sb.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(channelInitializer);
-                    
-                logger.info("NettyService [" + name + "] binding to port [" + port.get() + "]");
-                channel = sb.bind(port.get()).sync().channel();
-            } catch (final InterruptedException e) {
-                logger.info("Going to disconnect from port [" + port.get() + "]");
-                final ChannelFuture disconnect = channel.disconnect();
-                try {
-                    disconnect.await(1000);
-                } catch (final InterruptedException e1) {
-                    logger.error(e1);
-                } finally {
-                    bossGroup.shutdownGracefully();
-                    workerGroup.shutdownGracefully();
-                    interrupted();
-                }
-            }
-        }
-    };
-
-    public NettyService(final String name, final int port, final ChannelInitializer<?> channelInitializer) {
+    public NettyService(final String name, final int port, final ServerBootstrap serverBootstrap) {
         this.name = name;
         this.port.set(port);
-        this.channelInitializer = channelInitializer;
+        this.serverBootstrap = serverBootstrap;
     }
 
+    @Override
+    public void start(final StartContext context) throws StartException {
+        logger.info("NettyService [" + name + "] binding to port [" + port.get() + "]");
+        try {
+            channel = serverBootstrap.bind(port.get()).sync().channel();
+        } catch (InterruptedException e) {
+            throw new StartException(e);
+        }
+    }
+
+    @Override
+    public void stop(StopContext context) {
+        logger.info("NettyService [" + name + "] shutting down.");
+        channel.eventLoop().shutdownGracefully();
+    }
+    
     @Override
     public NettyService getValue() throws IllegalStateException, IllegalArgumentException {
         return this;
     }
 
-    @Override
-    public void start(StartContext context) throws StartException {
-        OUTPUT.start();
-    }
-
-    @Override
-    public void stop(StopContext context) {
-        OUTPUT.interrupt();
-    }
-
-    public static ServiceName createServiceName(final String suffix) {
-        return ServiceName.JBOSS.append("netty", suffix);
+    public static ServiceName createServiceName(final String name) {
+        return ServiceName.JBOSS.append("netty", name);
     }
 
     void setPort(final int port) {
