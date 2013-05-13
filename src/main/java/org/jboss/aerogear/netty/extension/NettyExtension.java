@@ -1,4 +1,4 @@
-package org.jboss.aerogear.simplepush.extension;
+package org.jboss.aerogear.netty.extension;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
@@ -31,51 +31,50 @@ import org.jboss.staxmapper.XMLExtendedStreamWriter;
 
 
 /**
- * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
+ * SimplePush Server subsystem for AS 7.x
  */
-public class SimplePushExtension implements Extension {
+public class NettyExtension implements Extension {
 
     /**
-     * The name space used for the {@code subsystem} element
+     * The name space used for the/ {@code subsystem} element
      */
-    public static final String NAMESPACE = "urn:org.jboss.aerogear.simplepush:1.0";
+    public static final String NAMESPACE = "urn:org.jboss.aerogear.netty:1.0";
 
     /**
      * The name of our subsystem within the model.
      */
-    public static final String SUBSYSTEM_NAME = "simplepush";
+    public static final String SUBSYSTEM_NAME = "netty";
 
     /**
      * The parser used for parsing our subsystem
      */
     private final SubsystemParser parser = new SubsystemParser();
 
-    private static final String RESOURCE_NAME = SimplePushExtension.class.getPackage().getName() + ".LocalDescriptions";
+    private static final String RESOURCE_NAME = NettyExtension.class.getPackage().getName() + ".LocalDescriptions";
 
     protected static final String TYPE = "type";
     protected static final String PORT = "port";
+    protected static final String FACTORY_CLASS = "factoryClass";
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
     protected static final PathElement TYPE_PATH = PathElement.pathElement(TYPE);
 
     static StandardResourceDescriptionResolver getResourceDescriptionResolver(final String keyPrefix) {
         String prefix = SUBSYSTEM_NAME + (keyPrefix == null ? "" : "." + keyPrefix);
-        return new StandardResourceDescriptionResolver(prefix, RESOURCE_NAME, SimplePushExtension.class.getClassLoader(), true, false);
+        return new StandardResourceDescriptionResolver(prefix, RESOURCE_NAME, NettyExtension.class.getClassLoader(), true, false);
     }
 
     @Override
-    public void initializeParsers(ExtensionParsingContext context) {
+    public void initializeParsers(final ExtensionParsingContext context) {
         context.setSubsystemXmlMapping(SUBSYSTEM_NAME, NAMESPACE, parser);
     }
 
     @Override
-    public void initialize(ExtensionContext context) {
+    public void initialize(final ExtensionContext context) {
         final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, 1, 0);
-        final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(SimplePushSubsystemDefinition.INSTANCE);
-
+        final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(NettySubsystemDefinition.INSTANCE);
         registration.registerSubModel(TypeDefinition.INSTANCE);
         subsystem.registerXMLElementWriter(parser);
     }
-
 
     /**
      * The subsystem parser, which uses stax to read and write to and from xml
@@ -86,7 +85,7 @@ public class SimplePushExtension implements Extension {
          * {@inheritDoc}
          */
         @Override
-        public void readElement(XMLExtendedStreamReader reader, List<ModelNode> list) throws XMLStreamException {
+        public void readElement(final XMLExtendedStreamReader reader, final List<ModelNode> list) throws XMLStreamException {
             // Require no attributes
             ParseUtils.requireNoAttributes(reader);
 
@@ -98,7 +97,7 @@ public class SimplePushExtension implements Extension {
 
             //Read the children
             while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
-                if (!reader.getLocalName().equals("simplepush-server")) {
+                if (!reader.getLocalName().equals("netty")) {
                     throw ParseUtils.unexpectedElement(reader);
                 }
                 while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
@@ -109,29 +108,31 @@ public class SimplePushExtension implements Extension {
             }
         }
 
-        private void readDeploymentType(XMLExtendedStreamReader reader, List<ModelNode> list) throws XMLStreamException {
-            ModelNode addTypeOperation = new ModelNode();
+        private void readDeploymentType(final XMLExtendedStreamReader reader, final List<ModelNode> list) throws XMLStreamException {
+            final ModelNode addTypeOperation = new ModelNode();
             addTypeOperation.get(OP).set(ModelDescriptionConstants.ADD);
 
-            String suffix = null;
+            String name = null;
             for (int i = 0; i < reader.getAttributeCount(); i++) {
-                String attr = reader.getAttributeLocalName(i);
-                String value = reader.getAttributeValue(i);
+                final String attr = reader.getAttributeLocalName(i);
+                final String value = reader.getAttributeValue(i);
                 if (attr.equals("port")) {
                     TypeDefinition.PORT.parseAndSetParameter(value, addTypeOperation, reader);
-                } else if (attr.equals("suffix")) {
-                    suffix = value;
+                } else if (attr.equals("name")) {
+                    name = value;
+                }  else if (attr.equals(FACTORY_CLASS)) {
+                    TypeDefinition.FACTORY_CLASS.parseAndSetParameter(value, addTypeOperation, reader);
                 } else {
                     throw ParseUtils.unexpectedAttribute(reader, i);
                 }
             }
             ParseUtils.requireNoContent(reader);
-            if (suffix == null) {
-                throw ParseUtils.missingRequiredElement(reader, Collections.singleton("suffix"));
+            if (name == null) {
+                throw ParseUtils.missingRequiredElement(reader, Collections.singleton("name"));
             }
 
             //Add the 'add' operation for each 'type' child
-            PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(TYPE, suffix));
+            final PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(TYPE, name));
             addTypeOperation.get(OP_ADDR).set(addr.toModelNode());
             list.add(addTypeOperation);
         }
@@ -142,17 +143,18 @@ public class SimplePushExtension implements Extension {
         @Override
         public void writeContent(final XMLExtendedStreamWriter writer, final SubsystemMarshallingContext context) throws XMLStreamException {
             //Write out the main subsystem element
-            context.startSubsystemElement(SimplePushExtension.NAMESPACE, false);
-            writer.writeStartElement("simplepush-server");
-            ModelNode node = context.getModelNode();
-            ModelNode type = node.get(TYPE);
+            context.startSubsystemElement(NettyExtension.NAMESPACE, false);
+            writer.writeStartElement("netty");
+            final ModelNode node = context.getModelNode();
+            final ModelNode type = node.get(TYPE);
             for (Property property : type.asPropertyList()) {
 
                 //write each child element to xml
-                writer.writeStartElement("deployment-type");
-                writer.writeAttribute("suffix", property.getName());
-                ModelNode entry = property.getValue();
+                writer.writeStartElement("server");
+                writer.writeAttribute("name", property.getName());
+                final ModelNode entry = property.getValue();
                 TypeDefinition.PORT.marshallAsAttribute(entry, true, writer);
+                TypeDefinition.FACTORY_CLASS.marshallAsAttribute(entry, true, writer);
                 writer.writeEndElement();
             }
             //End deployment-types

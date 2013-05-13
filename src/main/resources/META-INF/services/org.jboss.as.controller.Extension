@@ -1,1 +1,1 @@
-org.jboss.aerogear.simplepush.extension.SimplePushExtension
+org.jboss.aerogear.netty.extension.NettyExtension

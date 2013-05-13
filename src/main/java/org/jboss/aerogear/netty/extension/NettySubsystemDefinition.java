@@ -1,4 +1,4 @@
-package org.jboss.aerogear.simplepush.extension;
+package org.jboss.aerogear.netty.extension;
 
 import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.operations.common.GenericSubsystemDescribeHandler;
@@ -7,19 +7,14 @@ import org.jboss.as.controller.registry.OperationEntry;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIBE;
 
-/**
- * @author <a href="tcerar@redhat.com">Tomaz Cerar</a>
- */
-public class TrackerSubsystemDefinition extends SimpleResourceDefinition {
+public class NettySubsystemDefinition extends SimpleResourceDefinition {
 
-    public static final TrackerSubsystemDefinition INSTANCE = new TrackerSubsystemDefinition();
+    public static final NettySubsystemDefinition INSTANCE = new NettySubsystemDefinition();
 
-    private TrackerSubsystemDefinition() {
-        super(SimplePushExtension.SUBSYSTEM_PATH,
-                SimplePushExtension.getResourceDescriptionResolver(null),
-                //We always need to add an 'add' operation
+    private NettySubsystemDefinition() {
+        super(NettyExtension.SUBSYSTEM_PATH,
+                NettyExtension.getResourceDescriptionResolver(null),
                 SubsystemAdd.INSTANCE,
-                //Every resource that is added, normally needs a remove operation
                 SubsystemRemove.INSTANCE);
     }
 
@@ -30,7 +25,6 @@ public class TrackerSubsystemDefinition extends SimpleResourceDefinition {
     @Override
     public void registerOperations(ManagementResourceRegistration resourceRegistration) {
         super.registerOperations(resourceRegistration);
-        //We always need to add a 'describe' operation
         resourceRegistration.registerOperationHandler(DESCRIBE, GenericSubsystemDescribeHandler.INSTANCE, GenericSubsystemDescribeHandler.INSTANCE, false, OperationEntry.EntryType.PRIVATE);
     }
 }

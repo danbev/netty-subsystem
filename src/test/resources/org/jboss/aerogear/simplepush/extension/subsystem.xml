@@ -1,5 +1,0 @@
-<subsystem xmlns="urn:org.jboss.aerogear.simplepush:1.0">
-    <simplepush-server>
-        <deployment-type suffix="tst" port="7777"/>
-    </simplepush-server>
-</subsystem>
