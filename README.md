@@ -13,15 +13,15 @@ For now an example configuration could look like this:
             ...
         </netty>
     </subsystem>
-One or more ```server``` elements can be added.  
+One or more _server_ elements can be added.  
 
-```name```  
+####name  
 This is a simple name to identify the server in logs etc.
 
-```port```  
+####port  
 The port that Netty will listen to. This will be changed to be a _socket-binding_.
 
-```factoryClass```  
+####factoryClass  
 This is a class that implements ```org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory```:
 
     public interface ServerBootstrapFactory {
