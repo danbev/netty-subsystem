@@ -1,7 +1,7 @@
 package org.jboss.aerogear.netty.extension;
 
-import static org.jboss.aerogear.netty.extension.NettyExtension.TYPE;
-import static org.jboss.aerogear.netty.extension.NettyExtension.TYPE_PATH;
+import static org.jboss.aerogear.netty.extension.NettyExtension.SERVER;
+import static org.jboss.aerogear.netty.extension.NettyExtension.SERVER_PATH;
 
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
@@ -32,8 +32,8 @@ public class ServerDefinition extends SimpleResourceDefinition {
                     .build();
 
     private ServerDefinition() {
-        super(TYPE_PATH,
-                NettyExtension.getResourceDescriptionResolver(TYPE),
+        super(SERVER_PATH,
+                NettyExtension.getResourceDescriptionResolver(SERVER),
                 ServerAdd.INSTANCE,
                 ServerRemove.INSTANCE);
     }

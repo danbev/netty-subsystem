@@ -52,11 +52,11 @@ public class NettyExtension implements Extension {
 
     private static final String RESOURCE_NAME = NettyExtension.class.getPackage().getName() + ".LocalDescriptions";
 
-    protected static final String TYPE = "server";
+    protected static final String SERVER = "server";
     protected static final String PORT = "port";
     protected static final String FACTORY_CLASS = "factoryClass";
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
-    protected static final PathElement TYPE_PATH = PathElement.pathElement(TYPE);
+    protected static final PathElement SERVER_PATH = PathElement.pathElement(SERVER);
 
     static StandardResourceDescriptionResolver getResourceDescriptionResolver(final String keyPrefix) {
         String prefix = SUBSYSTEM_NAME + (keyPrefix == null ? "" : "." + keyPrefix);
@@ -97,7 +97,7 @@ public class NettyExtension implements Extension {
 
             //Read the children
             while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
-                if (!reader.getLocalName().equals("netty")) {
+                if (!reader.getLocalName().equals(SUBSYSTEM_NAME)) {
                     throw ParseUtils.unexpectedElement(reader);
                 }
                 while (reader.hasNext() && reader.nextTag() != END_ELEMENT) {
@@ -116,7 +116,7 @@ public class NettyExtension implements Extension {
             for (int i = 0; i < reader.getAttributeCount(); i++) {
                 final String attr = reader.getAttributeLocalName(i);
                 final String value = reader.getAttributeValue(i);
-                if (attr.equals("port")) {
+                if (attr.equals(PORT)) {
                     ServerDefinition.PORT.parseAndSetParameter(value, addTypeOperation, reader);
                 } else if (attr.equals("name")) {
                     name = value;
@@ -132,7 +132,7 @@ public class NettyExtension implements Extension {
             }
 
             //Add the 'add' operation for each 'type' child
-            final PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(TYPE, name));
+            final PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(SERVER, name));
             addTypeOperation.get(OP_ADDR).set(addr.toModelNode());
             list.add(addTypeOperation);
         }
@@ -146,9 +146,9 @@ public class NettyExtension implements Extension {
             context.startSubsystemElement(NettyExtension.NAMESPACE, false);
             writer.writeStartElement(SUBSYSTEM_NAME);
             final ModelNode node = context.getModelNode();
-            final ModelNode type = node.get(TYPE);
+            final ModelNode type = node.get(SERVER);
             for (Property property : type.asPropertyList()) {
-                writer.writeStartElement("server");
+                writer.writeStartElement(SERVER);
                 writer.writeAttribute("name", property.getName());
                 final ModelNode entry = property.getValue();
                 ServerDefinition.PORT.marshallAsAttribute(entry, true, writer);
