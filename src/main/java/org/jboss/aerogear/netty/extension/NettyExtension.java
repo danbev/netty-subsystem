@@ -52,7 +52,7 @@ public class NettyExtension implements Extension {
 
     private static final String RESOURCE_NAME = NettyExtension.class.getPackage().getName() + ".LocalDescriptions";
 
-    protected static final String TYPE = "type";
+    protected static final String TYPE = "server";
     protected static final String PORT = "port";
     protected static final String FACTORY_CLASS = "factoryClass";
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);

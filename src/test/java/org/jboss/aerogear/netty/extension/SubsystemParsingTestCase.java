@@ -65,7 +65,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(firstPathElement.getKey(), equalTo(SUBSYSTEM));
         assertThat(firstPathElement.getValue(), equalTo(NettyExtension.SUBSYSTEM_NAME));
         final PathElement secondPathElement = addr.getElement(1);
-        Assert.assertEquals("type", secondPathElement.getKey());
+        Assert.assertEquals("server", secondPathElement.getKey());
         Assert.assertEquals("simplepush", secondPathElement.getValue());
     }
 
@@ -75,12 +75,12 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
         final ModelNode model = services.readWholeModel();
         assertThat(model.get(SUBSYSTEM).hasDefined(NettyExtension.SUBSYSTEM_NAME), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME).hasDefined("type"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type").hasDefined("simplepush"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type", "simplepush").hasDefined("port"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type", "simplepush").hasDefined("factoryClass"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type", "simplepush", "port").asInt(), is(7777));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type", "simplepush", "factoryClass").asString(), is(MockChannelInitFactory.class.getName()));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME).hasDefined("server"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("simplepush"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("port"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("factoryClass"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "port").asInt(), is(7777));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "factoryClass").asString(), is(MockChannelInitFactory.class.getName()));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         //Add another type
         final PathAddress fooTypeAddr = PathAddress.pathAddress(
                 PathElement.pathElement(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME),
-                PathElement.pathElement("type", "foo"));
+                PathElement.pathElement("server", "foo"));
         final ModelNode addOp = new ModelNode();
         addOp.get(OP).set(ADD);
         addOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
@@ -153,14 +153,14 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
         final ModelNode model = services.readWholeModel();
         assertThat(model.get(SUBSYSTEM).hasDefined(NettyExtension.SUBSYSTEM_NAME), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME).hasDefined("type"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type").hasDefined("simplepush"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type", "simplepush").hasDefined("port"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type", "simplepush", "port").asInt(), is(7777));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME).hasDefined("server"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("simplepush"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("port"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "port").asInt(), is(7777));
 
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type").hasDefined("foo"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type", "foo").hasDefined("port"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "type", "foo", "port").asInt(), is(1000));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("foo"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo").hasDefined("port"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "port").asInt(), is(1000));
 
         //Call write-attribute
         /*
