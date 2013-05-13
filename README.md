@@ -2,6 +2,13 @@
 This project adds a AS7/Wildfly subsystem for Netty. Currently the features are very limited to our needs in 
 AeroGear SimplePush were we simply want to start a Netty server within AS7/Wildfly.
 
+### Prerequisites
+This project has a dependency to aerogear-simplepush-server which will be removed later:
+
+    git clone git@github.com:danbev/aerogear-simplepush-server.git
+    cd aerogear-simplepush-server
+    mvn install
+
 ## Configuration
 The configuration of the subsystem if very limited at the moment, but we plan to hook this into the normal AS7/Wildfly
 configuration using ```socket-binding``` etc. 
