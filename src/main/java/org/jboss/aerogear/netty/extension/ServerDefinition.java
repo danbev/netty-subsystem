@@ -11,8 +11,8 @@ import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 
-public class TypeDefinition extends SimpleResourceDefinition {
-    public static final TypeDefinition INSTANCE = new TypeDefinition();
+public class ServerDefinition extends SimpleResourceDefinition {
+    public static final ServerDefinition INSTANCE = new ServerDefinition();
 
     protected static final SimpleAttributeDefinition PORT =
             new SimpleAttributeDefinitionBuilder(NettyExtension.PORT, ModelType.INT)
@@ -31,11 +31,11 @@ public class TypeDefinition extends SimpleResourceDefinition {
                     .setAllowNull(false)
                     .build();
 
-    private TypeDefinition() {
+    private ServerDefinition() {
         super(TYPE_PATH,
                 NettyExtension.getResourceDescriptionResolver(TYPE),
-                TypeAdd.INSTANCE,
-                TypeRemove.INSTANCE);
+                ServerAdd.INSTANCE,
+                ServerRemove.INSTANCE);
     }
 
     @Override

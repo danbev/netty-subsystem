@@ -12,7 +12,7 @@ class NettyPortHandler extends AbstractWriteAttributeHandler<Void> {
     public static final NettyPortHandler INSTANCE = new NettyPortHandler();
 
     private NettyPortHandler() {
-        super(TypeDefinition.PORT);
+        super(ServerDefinition.PORT);
     }
 
     protected boolean applyUpdateToRuntime(final OperationContext context, 

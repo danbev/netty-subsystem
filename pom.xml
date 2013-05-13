@@ -23,7 +23,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jboss.aerogear</groupId>
-    <artifactId>simplepush-subsystem</artifactId>
+    <artifactId>netty-subsystem</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <name>AeroGear SimplePush Subsystem</name>
@@ -34,7 +34,7 @@
         <version.jboss.as>7.1.1.Final</version.jboss.as>
         <version.junit>4.11</version.junit>
         <version.simplepush.server>1.0.0-SNAPSHOT</version.simplepush.server>
-        <module.name>org.jboss.aerogear.simplepush</module.name>
+        <module.name>org.jboss.aerogear.netty</module.name>
     </properties>
     
 

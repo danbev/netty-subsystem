@@ -8,11 +8,11 @@ import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceName;
 
-class TypeRemove extends AbstractRemoveStepHandler{
+class ServerRemove extends AbstractRemoveStepHandler{
 
-    public static final TypeRemove INSTANCE = new TypeRemove();
+    public static final ServerRemove INSTANCE = new ServerRemove();
 
-    private TypeRemove() {
+    private ServerRemove() {
     }
 
     @Override

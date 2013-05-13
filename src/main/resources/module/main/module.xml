@@ -1,6 +1,6 @@
-<module xmlns="urn:jboss:module:1.0" name="org.jboss.aerogear.simplepush">
+<module xmlns="urn:jboss:module:1.0" name="org.jboss.aerogear.netty">
     <resources>
-        <resource-root path="simplepush-subsystem.jar"/>
+        <resource-root path="netty-subsystem.jar"/>
         <resource-root path="aerogear-simplepush-server.jar"/>
         <resource-root path="netty-all.jar"/>
         <resource-root path="slf4j-api.jar"/>

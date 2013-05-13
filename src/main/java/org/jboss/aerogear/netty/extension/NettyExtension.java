@@ -31,7 +31,7 @@ import org.jboss.staxmapper.XMLExtendedStreamWriter;
 
 
 /**
- * SimplePush Server subsystem for AS 7.x
+ * Netty Server subsystem for AS 7.x
  */
 public class NettyExtension implements Extension {
 
@@ -72,7 +72,7 @@ public class NettyExtension implements Extension {
     public void initialize(final ExtensionContext context) {
         final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, 1, 0);
         final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(NettySubsystemDefinition.INSTANCE);
-        registration.registerSubModel(TypeDefinition.INSTANCE);
+        registration.registerSubModel(ServerDefinition.INSTANCE);
         subsystem.registerXMLElementWriter(parser);
     }
 
@@ -117,11 +117,11 @@ public class NettyExtension implements Extension {
                 final String attr = reader.getAttributeLocalName(i);
                 final String value = reader.getAttributeValue(i);
                 if (attr.equals("port")) {
-                    TypeDefinition.PORT.parseAndSetParameter(value, addTypeOperation, reader);
+                    ServerDefinition.PORT.parseAndSetParameter(value, addTypeOperation, reader);
                 } else if (attr.equals("name")) {
                     name = value;
                 }  else if (attr.equals(FACTORY_CLASS)) {
-                    TypeDefinition.FACTORY_CLASS.parseAndSetParameter(value, addTypeOperation, reader);
+                    ServerDefinition.FACTORY_CLASS.parseAndSetParameter(value, addTypeOperation, reader);
                 } else {
                     throw ParseUtils.unexpectedAttribute(reader, i);
                 }
@@ -144,22 +144,18 @@ public class NettyExtension implements Extension {
         public void writeContent(final XMLExtendedStreamWriter writer, final SubsystemMarshallingContext context) throws XMLStreamException {
             //Write out the main subsystem element
             context.startSubsystemElement(NettyExtension.NAMESPACE, false);
-            writer.writeStartElement("netty");
+            writer.writeStartElement(SUBSYSTEM_NAME);
             final ModelNode node = context.getModelNode();
             final ModelNode type = node.get(TYPE);
             for (Property property : type.asPropertyList()) {
-
-                //write each child element to xml
                 writer.writeStartElement("server");
                 writer.writeAttribute("name", property.getName());
                 final ModelNode entry = property.getValue();
-                TypeDefinition.PORT.marshallAsAttribute(entry, true, writer);
-                TypeDefinition.FACTORY_CLASS.marshallAsAttribute(entry, true, writer);
+                ServerDefinition.PORT.marshallAsAttribute(entry, true, writer);
+                ServerDefinition.FACTORY_CLASS.marshallAsAttribute(entry, true, writer);
                 writer.writeEndElement();
             }
-            //End deployment-types
             writer.writeEndElement();
-            //End subsystem
             writer.writeEndElement();
         }
     }

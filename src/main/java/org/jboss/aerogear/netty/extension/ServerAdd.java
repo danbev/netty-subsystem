@@ -16,17 +16,17 @@ import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceName;
 
-class TypeAdd extends AbstractAddStepHandler {
+class ServerAdd extends AbstractAddStepHandler {
 
-    public static final TypeAdd INSTANCE = new TypeAdd();
+    public static final ServerAdd INSTANCE = new ServerAdd();
 
-    private TypeAdd() {
+    private ServerAdd() {
     }
    
     @Override
     protected void populateModel(final ModelNode operation, final ModelNode model) throws OperationFailedException {
-        TypeDefinition.PORT.validateAndSet(operation, model);
-        TypeDefinition.FACTORY_CLASS.validateAndSet(operation, model);
+        ServerDefinition.PORT.validateAndSet(operation, model);
+        ServerDefinition.FACTORY_CLASS.validateAndSet(operation, model);
     }
 
     @Override
@@ -36,9 +36,9 @@ class TypeAdd extends AbstractAddStepHandler {
             final ServiceVerificationHandler verificationHandler, 
             final List<ServiceController<?>> newControllers) throws OperationFailedException {
         
-        final String factoryClass = TypeDefinition.FACTORY_CLASS.resolveModelAttribute(context, model).asString();
+        final String factoryClass = ServerDefinition.FACTORY_CLASS.resolveModelAttribute(context, model).asString();
         final ChannelInitializer<?> channelInitializer = createChannelInitializer(factoryClass);
-        final int port = TypeDefinition.PORT.resolveModelAttribute(context, model).asInt();
+        final int port = ServerDefinition.PORT.resolveModelAttribute(context, model).asInt();
         final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         
         final NettyService service = new NettyService(serverName, port, channelInitializer);
