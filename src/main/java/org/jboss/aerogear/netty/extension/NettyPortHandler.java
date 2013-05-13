@@ -29,7 +29,7 @@ class NettyPortHandler extends AbstractWriteAttributeHandler<Void> {
     public static final NettyPortHandler INSTANCE = new NettyPortHandler();
 
     private NettyPortHandler() {
-        super(ServerDefinition.PORT);
+        super(ServerDefinition.SOCKET_BINDING);
     }
 
     protected boolean applyUpdateToRuntime(final OperationContext context, 
@@ -39,10 +39,9 @@ class NettyPortHandler extends AbstractWriteAttributeHandler<Void> {
             final ModelNode currentValue, 
             final HandbackHolder<Void> handbackHolder) throws OperationFailedException {
         
-        if (attributeName.equals(NettyExtension.PORT)) {
+        if (attributeName.equals(NettyExtension.SOCKET_BINDING)) {
             final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
             final NettyService service = (NettyService) context.getServiceRegistry(true).getRequiredService(NettyService.createServiceName(serverName)).getValue();
-            service.setPort(resolvedValue.asInt());
             context.completeStep();
         }
         return false;

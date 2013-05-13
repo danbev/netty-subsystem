@@ -20,37 +20,49 @@ package org.jboss.aerogear.netty.extension;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
+import org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory;
+import org.jboss.as.network.SocketBinding;
 import org.jboss.logging.Logger;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
+import org.jboss.msc.value.InjectedValue;
 
 public class NettyService implements Service<NettyService> {
 
-    private final AtomicInteger port = new AtomicInteger(0);
     private final Logger logger = Logger.getLogger(NettyService.class);
 
-    private final ServerBootstrap serverBootstrap;
+    private final InjectedValue<SocketBinding> socketBindingInj = new InjectedValue<SocketBinding>();
     private final String name;
+    private final String factoryClass;
     private Channel channel;
-
-    public NettyService(final String name, final int port, final ServerBootstrap serverBootstrap) {
+    
+    public NettyService(final String name, final String factoryClass) {
         this.name = name;
-        this.port.set(port);
-        this.serverBootstrap = serverBootstrap;
+        this.factoryClass = factoryClass;
     }
-
+    
     @Override
     public void start(final StartContext context) throws StartException {
-        logger.info("NettyService [" + name + "] binding to port [" + port.get() + "]");
         try {
-            channel = serverBootstrap.bind(port.get()).sync().channel();
-        } catch (InterruptedException e) {
+            final SocketBinding socketBinding = socketBindingInj.getValue();
+            final ServerBootstrap serverBootstrap = createServerBootstrap(factoryClass, socketBinding);
+            logger.info("NettyService [" + name + "] binding to port [" + socketBinding.getPort() + "]");
+            channel = serverBootstrap.bind(socketBinding.getPort()).sync().channel();
+        } catch (final InterruptedException e) {
             throw new StartException(e);
+        }
+    }
+    
+    private ServerBootstrap createServerBootstrap(final String factoryClass, final SocketBinding socketBinding) throws StartException {
+        try {
+            final Class<?> type = Class.forName(factoryClass);
+            final ServerBootstrapFactory factory = (ServerBootstrapFactory) type.newInstance();
+            return factory.createServerBootstrap(socketBinding);
+        } catch (final Exception e) {
+            throw new StartException(e.getMessage());
         }
     }
 
@@ -58,6 +70,10 @@ public class NettyService implements Service<NettyService> {
     public void stop(StopContext context) {
         logger.info("NettyService [" + name + "] shutting down.");
         channel.eventLoop().shutdownGracefully();
+    }
+    
+    public InjectedValue<SocketBinding> getInjectedSocketBinding() {
+        return socketBindingInj;
     }
     
     @Override
@@ -69,11 +85,4 @@ public class NettyService implements Service<NettyService> {
         return ServiceName.JBOSS.append("netty", name);
     }
 
-    void setPort(final int port) {
-        this.port.set(port);
-    }
-
-    public int getPort() {
-        return port.get();
-    }
 }

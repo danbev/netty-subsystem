@@ -15,7 +15,7 @@
     </xs:complexType>
     <xs:complexType name="serverType">
         <xs:attribute name="name" use="required"/>
-        <xs:attribute name="port" type="xs:long" use="optional" default="10000"/>
+        <xs:attribute name="socket-binding" type="xs:string" use="required"/>
         <xs:attribute name="factoryClass" type="xs:string"/>
     </xs:complexType>
 </xs:schema>

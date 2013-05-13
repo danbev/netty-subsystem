@@ -26,11 +26,12 @@ import org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory;
 import org.jboss.aerogear.simplepush.server.datastore.DataStore;
 import org.jboss.aerogear.simplepush.server.datastore.InMemoryDataStore;
 import org.jboss.aerogear.simplepush.server.netty.WebSocketChannelInitializer;
+import org.jboss.as.network.SocketBinding;
 
 public class SimplePushBootstrapFactory implements ServerBootstrapFactory {
 
     @Override
-    public ServerBootstrap createServerBootstrap() {
+    public ServerBootstrap createServerBootstrap(final SocketBinding socketBinding) {
         final DataStore datastore = new InMemoryDataStore();
         final WebSocketChannelInitializer channelInitializer = new WebSocketChannelInitializer(datastore, false);
         final EventLoopGroup bossGroup = new NioEventLoopGroup();

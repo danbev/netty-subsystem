@@ -10,9 +10,6 @@ This project has a dependency to aerogear-simplepush-server which will be remove
     mvn install
 
 ## Configuration
-The configuration of the subsystem if very limited at the moment, but we plan to hook this into the normal AS7/Wildfly
-configuration using ```socket-binding``` etc.  
-
 For now, an example configuration in ```AS7_HOME/standalone/configuration/standalone.xml``` could look like this:
     <extensions>
         ...
@@ -23,24 +20,31 @@ For now, an example configuration in ```AS7_HOME/standalone/configuration/standa
         ...
         <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
             <netty>
-                <server name="simplepush" port="7777" factoryClass="org.jboss.aerogear.netty.extension.SimplePushBootstrapFactory"/>
+                <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.jboss.aerogear.netty.extension.SimplePushBootstrapFactory"/>
                 ...
             </netty>
         </subsystem>
     </profile>    
+    
+     <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
+         ...
+         <socket-binding name="simplepush" port="7777"/>
+     </socket-binding-group>
+    
 One or more _server_ elements can be added enabling different types of servers to be run.  
 
 ####name  
 This is a simple name to identify the server in logs etc.
 
-####port  
-The port that Netty will listen to. This will be changed to be a _socket-binding_.
+####socket-binding  
+The socket-binding to be used for this Netty server instance. An instance of ```SocketBinding``` will be passed into 
+the factory class's ```createServerBootstrap``` method.
 
 ####factoryClass  
 This is a class that implements ```org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory```:
 
     public interface ServerBootstrapFactory {
-        ServerBootstrap createServerBootstrap();
+        ServerBootstrap createServerBootstrap(SocketBinding socketBinding);
     }
 
 ## Building
@@ -61,10 +65,15 @@ Update ```AS7_HOME/standalone/configuration/standalone.xml``` could look like th
         ...
         <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
             <netty>
-                <server name="simplepush" port="7777" factoryClass="org.jboss.aerogear.netty.extension.SimplePushBootstrapFactory"/>
+                <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.jboss.aerogear.netty.extension.SimplePushBootstrapFactory"/>
             </netty>
         </subsystem>
     </profile>
+    
+    <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
+        ...
+        <socket-binding name="simplepush" port="7777"/>
+    </socket-binding-group>
     
 Copy the module produced by ```mvn package``` to the _modules_ directory of the application server.
 

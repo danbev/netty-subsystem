@@ -1,5 +1,5 @@
 <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
     <netty>
-        <server name="simplepush" port="7777" factoryClass="org.jboss.aerogear.netty.extension.SimplePushChannelInitializer"/>
+        <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.jboss.aerogear.netty.extension.SimplePushChannelInitializer"/>
     </netty>
 </subsystem>

@@ -17,10 +17,12 @@
 
 package org.jboss.aerogear.netty.extension.api;
 
+import org.jboss.as.network.SocketBinding;
+
 import io.netty.bootstrap.ServerBootstrap;
 
 public interface ServerBootstrapFactory {
     
-    ServerBootstrap createServerBootstrap();
+    ServerBootstrap createServerBootstrap(SocketBinding socketBinding);
 
 }

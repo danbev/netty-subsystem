@@ -25,11 +25,12 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory;
+import org.jboss.as.network.SocketBinding;
 
 public class MockServerBootstrapFactory implements ServerBootstrapFactory {
 
     @Override
-    public ServerBootstrap createServerBootstrap() {
+    public ServerBootstrap createServerBootstrap(final SocketBinding socketBinding) {
         final EventLoopGroup bossGroup = new NioEventLoopGroup();
         final EventLoopGroup workerGroup = new NioEventLoopGroup();
         final ServerBootstrap sb = new ServerBootstrap();

@@ -31,10 +31,14 @@ import org.jboss.dmr.ModelType;
 public class ServerDefinition extends SimpleResourceDefinition {
     public static final ServerDefinition INSTANCE = new ServerDefinition();
 
-    protected static final SimpleAttributeDefinition PORT =
-            new SimpleAttributeDefinitionBuilder(NettyExtension.PORT, ModelType.INT)
+    protected static final SimpleAttributeDefinition SOCKET_BINDING = new SimpleAttributeDefinition(NettyExtension.SOCKET_BINDING, ModelType.STRING, false);
+    protected static final SimpleAttributeDefinition FACTORY_CLASS = new SimpleAttributeDefinition(NettyExtension.FACTORY_CLASS, ModelType.STRING, false);
+    /*
+
+    protected static final SimpleAttributeDefinition SOCKET_BINDING =
+            new SimpleAttributeDefinitionBuilder(NettyExtension.SOCKET_BINDING, ModelType.STRING)
                     .setAllowExpression(true)
-                    .setXmlName(NettyExtension.PORT)
+                    .setXmlName(NettyExtension.SOCKET_BINDING)
                     .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
                     .setDefaultValue(new ModelNode(7777))
                     .setAllowNull(false)
@@ -47,6 +51,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
                     .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
                     .setAllowNull(false)
                     .build();
+    */
 
     private ServerDefinition() {
         super(SERVER_PATH,
@@ -57,7 +62,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
 
     @Override
     public void registerAttributes(final ManagementResourceRegistration resourceRegistration) {
-        resourceRegistration.registerReadWriteAttribute(PORT, null, NettyPortHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(SOCKET_BINDING, null, NettyPortHandler.INSTANCE);
         resourceRegistration.registerReadWriteAttribute(FACTORY_CLASS, null, NettyPortHandler.INSTANCE);
     }
 }
