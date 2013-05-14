@@ -49,8 +49,9 @@ As and example, _$WILDFLYHOME/standalone/configuration/standalone.xml_ could loo
 One or more _server_ elements can be added enabling different types of servers to be run.  
 
 #### Netty Subsystem atttributes
-The Netty subsystem can have one or more _server_ elements and this section describe its attributes.
-  
+The Netty subsystem can have one or more _server_ elements and this section describe its attributes.  
+
+
 ```name```  
 This is a simple name to identify the server in logs etc.
 
