@@ -24,11 +24,11 @@ import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 
-class NettyPortHandler extends AbstractWriteAttributeHandler<Void> {
+class NettySocketBindingHandler extends AbstractWriteAttributeHandler<Void> {
 
-    public static final NettyPortHandler INSTANCE = new NettyPortHandler();
+    public static final NettySocketBindingHandler INSTANCE = new NettySocketBindingHandler();
 
-    private NettyPortHandler() {
+    private NettySocketBindingHandler() {
         super(ServerDefinition.SOCKET_BINDING);
     }
 

@@ -62,7 +62,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
 
     @Override
     public void registerAttributes(final ManagementResourceRegistration resourceRegistration) {
-        resourceRegistration.registerReadWriteAttribute(SOCKET_BINDING, null, NettyPortHandler.INSTANCE);
-        resourceRegistration.registerReadWriteAttribute(FACTORY_CLASS, null, NettyPortHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(SOCKET_BINDING, null, NettySocketBindingHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(FACTORY_CLASS, null, NettySocketBindingHandler.INSTANCE);
     }
 }
