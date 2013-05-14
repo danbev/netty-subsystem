@@ -21,16 +21,35 @@ This project has a dependency to aerogear-simplepush-server which will be remove
     
 A JBoss Modules module will be generated in _target/module/org/jboss/aerogear/netty/main_.    
 
+## Installation
+Copy the module produced by ```mvn package``` to the _modules_ directory of the application server.
+
+    cp -r target/module $WILDFLY_HOME/modules
+
 ## Usage
 
 ### Adding the subsystem to WildFly
 The Netty subsystem can be added to any of the configurations that are shipped with WildFly. 
-As an example, _$WILDFLYHOME/standalone/configuration/standalone.xml_ could look like this:
+As an example, add the following elements to _$WILDFLYHOME/standalone/configuration/standalone.xml_.
+
+
+#### Add the extension
 
     <extensions>
         ...
         <extension module="org.jboss.aerogear.netty"/>
     <extensions>
+    
+    
+#### Add a socket-binding    
+
+    
+    <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
+        ...
+        <socket-binding name="simplepush" port="7777"/>
+    </socket-binding-group>  
+
+#### Add the Netty subsystem
 
     <profile>
         ...
@@ -42,16 +61,7 @@ As an example, _$WILDFLYHOME/standalone/configuration/standalone.xml_ could look
         </subsystem>
     </profile>    
     
-     <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
-         ...
-         <socket-binding name="simplepush" port="7777"/>
-     </socket-binding-group>  
-     
-    
 One or more _server_ elements can be added enabling different types of servers to be run.  
-
-#### Netty Subsystem atttributes
-The Netty subsystem can have one or more _server_ elements and this section describe its attributes.  
 
 __name__  
 This is a simple name to identify the server in logs etc.
@@ -62,7 +72,8 @@ the factory class's _createServerBootstrap_ method.
 
 __factoryClass__  
 This is a class that implements _org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory_ and is responsible for 
-creating a [ServerBootstrap](http://netty.io/4.0/api/io/netty/bootstrap/ServerBootstrap.html).  
+creating a [ServerBootstrap](http://netty.io/4.0/api/io/netty/bootstrap/ServerBootstrap.html). This allows the end user to
+configure the Netty server application with the appropriate _Channel_, _ChannelPipeline_ etc.  
 The sole method, _createServerBootstrap_, takes a single parameter which is a [SocketBinding](https://github.com/wildfly/wildfly/blob/master/network/src/main/java/org/jboss/as/network/SocketBinding.java) instance:
 
     public interface ServerBootstrapFactory {
@@ -73,10 +84,7 @@ The _ServerBoostrapFactory_ interface is currently part of this project but shou
 be the only dependency that a project wanting to integrate with WildFly would have to implement.
 
 
-## Installation
-Copy the module produced by ```mvn package``` to the _modules_ directory of the application server.
 
-    cp -r target/module $AS7_HOME/modules
     
     
     
