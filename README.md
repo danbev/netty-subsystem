@@ -26,6 +26,7 @@ A JBoss Modules module will be generated in _target/module/org/jboss/aerogear/ne
 ### Adding the subsystem to WildFly
 The Netty subsystem can be added to any of the configurations that are shipped with WildFly. 
 As and example, _$WILDFLYHOME/standalone/configuration/standalone.xml_ could look like this:
+
     <extensions>
         ...
         <extension module="org.jboss.aerogear.netty"/>
@@ -50,7 +51,6 @@ One or more _server_ elements can be added enabling different types of servers t
 
 #### Netty Subsystem atttributes
 The Netty subsystem can have one or more _server_ elements and this section describe its attributes.  
-
 
 ```name```  
 This is a simple name to identify the server in logs etc.
