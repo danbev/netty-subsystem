@@ -25,7 +25,7 @@ A JBoss Modules module will be generated in _target/module/org/jboss/aerogear/ne
 
 ### Adding the subsystem to WildFly
 The Netty subsystem can be added to any of the configurations that are shipped with WildFly. 
-As and example, _$WILDFLYHOME/standalone/configuration/standalone.xml_ could look like this:
+As an example, _$WILDFLYHOME/standalone/configuration/standalone.xml_ could look like this:
 
     <extensions>
         ...
@@ -45,24 +45,25 @@ As and example, _$WILDFLYHOME/standalone/configuration/standalone.xml_ could loo
      <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
          ...
          <socket-binding name="simplepush" port="7777"/>
-     </socket-binding-group>
+     </socket-binding-group>  
+     
     
 One or more _server_ elements can be added enabling different types of servers to be run.  
 
 #### Netty Subsystem atttributes
 The Netty subsystem can have one or more _server_ elements and this section describe its attributes.  
 
-```name```  
+__name__  
 This is a simple name to identify the server in logs etc.
 
-```socket-binding```  
+__socket-binding__  
 The socket-binding to be used for this Netty server instance. An instance of _SocketBinding_ will be passed into 
 the factory class's _createServerBootstrap_ method.
 
-```FactoryClass```  
+__factoryClass__  
 This is a class that implements _org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory_ and is responsible for 
-creating a [ServerBootstrap](http://netty.io/4.0/api/io/netty/bootstrap/ServerBootstrap.html). The sole method, _createServerBootstrap_, 
-takes a single parameter which is a [SocketBinding](https://github.com/wildfly/wildfly/blob/master/network/src/main/java/org/jboss/as/network/SocketBinding.java) instance:
+creating a [ServerBootstrap](http://netty.io/4.0/api/io/netty/bootstrap/ServerBootstrap.html).  
+The sole method, _createServerBootstrap_, takes a single parameter which is a [SocketBinding](https://github.com/wildfly/wildfly/blob/master/network/src/main/java/org/jboss/as/network/SocketBinding.java) instance:
 
     public interface ServerBootstrapFactory {
         ServerBootstrap createServerBootstrap(SocketBinding socketBinding);
