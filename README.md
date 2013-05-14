@@ -67,8 +67,7 @@ __name__
 This is a simple name to identify the server in logs etc.
 
 __socket-binding__  
-The socket-binding to be used for this Netty server instance. An instance of _SocketBinding_ will be passed into 
-the factory class's _createServerBootstrap_ method.
+The socket-binding to be used for this Netty server instance. 
 
 __factoryClass__  
 This is a class that implements _org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory_ and is responsible for 
