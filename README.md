@@ -83,6 +83,15 @@ The sole method, _createServerBootstrap_, takes a single parameter which is a [S
 The _ServerBoostrapFactory_ interface is currently part of this project but should be extracted to a separate dependency so it would 
 be the only dependency that a project wanting to integrate with WildFly would have to implement.
 
+### Start WildFly
+
+    ./standalone.sh
+
+If you inspect the server console output you'll see the following message:
+
+    08:56:13,052 INFO  [org.jboss.aerogear.netty.extension.NettyService] (MSC service thread 1-3) NettyService [simplepush-server] binding to port [7777]    
+    
+    
 
 
     
