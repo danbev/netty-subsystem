@@ -17,6 +17,8 @@
 
 package org.jboss.aerogear.netty.extension;
 
+import java.util.concurrent.ThreadFactory;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
@@ -30,7 +32,7 @@ import org.jboss.as.network.SocketBinding;
 public class MockServerBootstrapFactory implements ServerBootstrapFactory {
 
     @Override
-    public ServerBootstrap createServerBootstrap(final SocketBinding socketBinding) {
+    public ServerBootstrap createServerBootstrap(final SocketBinding socketBinding, final ThreadFactory threadFactory) {
         final EventLoopGroup bossGroup = new NioEventLoopGroup();
         final EventLoopGroup workerGroup = new NioEventLoopGroup();
         final ServerBootstrap sb = new ServerBootstrap();

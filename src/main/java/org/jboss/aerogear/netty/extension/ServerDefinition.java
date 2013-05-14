@@ -21,38 +21,23 @@ import static org.jboss.aerogear.netty.extension.NettyExtension.SERVER;
 import static org.jboss.aerogear.netty.extension.NettyExtension.SERVER_PATH;
 
 import org.jboss.as.controller.SimpleAttributeDefinition;
-import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.SimpleResourceDefinition;
-import org.jboss.as.controller.registry.AttributeAccess;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 
 public class ServerDefinition extends SimpleResourceDefinition {
+    
+    protected static final String SOCKET_BINDING = "socket-binding";
+    protected static final String THREAD_FACTORY = "thread-factory";
+    protected static final String FACTORY_CLASS = "factoryClass";
+    
+    protected static final SimpleAttributeDefinition SOCKET_BINDING_ATTR = new SimpleAttributeDefinition(SOCKET_BINDING, ModelType.STRING, false);
+    protected static final SimpleAttributeDefinition FACTORY_CLASS_ATTR = new SimpleAttributeDefinition(FACTORY_CLASS, ModelType.STRING, false);
+    protected static final SimpleAttributeDefinition THREAD_FACTORY_ATTR = new SimpleAttributeDefinition(THREAD_FACTORY, ModelType.STRING, true);
+    
     public static final ServerDefinition INSTANCE = new ServerDefinition();
 
-    protected static final SimpleAttributeDefinition SOCKET_BINDING = new SimpleAttributeDefinition(NettyExtension.SOCKET_BINDING, ModelType.STRING, false);
-    protected static final SimpleAttributeDefinition FACTORY_CLASS = new SimpleAttributeDefinition(NettyExtension.FACTORY_CLASS, ModelType.STRING, false);
-    /*
-
-    protected static final SimpleAttributeDefinition SOCKET_BINDING =
-            new SimpleAttributeDefinitionBuilder(NettyExtension.SOCKET_BINDING, ModelType.STRING)
-                    .setAllowExpression(true)
-                    .setXmlName(NettyExtension.SOCKET_BINDING)
-                    .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
-                    .setDefaultValue(new ModelNode(7777))
-                    .setAllowNull(false)
-                    .build();
     
-    protected static final SimpleAttributeDefinition FACTORY_CLASS =
-            new SimpleAttributeDefinitionBuilder(NettyExtension.FACTORY_CLASS, ModelType.STRING)
-                    .setAllowExpression(false)
-                    .setXmlName(NettyExtension.FACTORY_CLASS)
-                    .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
-                    .setAllowNull(false)
-                    .build();
-    */
-
     private ServerDefinition() {
         super(SERVER_PATH,
                 NettyExtension.getResourceDescriptionResolver(SERVER),
@@ -62,7 +47,8 @@ public class ServerDefinition extends SimpleResourceDefinition {
 
     @Override
     public void registerAttributes(final ManagementResourceRegistration resourceRegistration) {
-        resourceRegistration.registerReadWriteAttribute(SOCKET_BINDING, null, NettySocketBindingHandler.INSTANCE);
-        resourceRegistration.registerReadWriteAttribute(FACTORY_CLASS, null, NettySocketBindingHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(SOCKET_BINDING_ATTR, null, NettySocketBindingHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(FACTORY_CLASS_ATTR, null, NettySocketBindingHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(THREAD_FACTORY_ATTR, null, NettySocketBindingHandler.INSTANCE);
     }
 }

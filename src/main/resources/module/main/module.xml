@@ -4,7 +4,7 @@
         <resource-root path="aerogear-simplepush-server.jar"/>
         <resource-root path="netty-all.jar"/>
         <resource-root path="slf4j-api.jar"/>
-        <resource-root path="slf4j-simple.jar"/>
+        <!--resource-root path="slf4j-simple.jar"/-->
         <resource-root path="jackson-core-asl.jar"/>
         <resource-root path="jackson-mapper-asl.jar"/>
     </resources>
@@ -15,9 +15,11 @@
         <module name="org.jboss.as.controller"/>
         <module name="org.jboss.as.server"/>
         <module name="org.jboss.as.network"/>
+        <module name="org.jboss.as.threads"/>
         <module name="org.jboss.modules"/>
         <module name="org.jboss.msc"/>
         <module name="org.jboss.logging"/>
         <module name="org.jboss.vfs"/>
+        <module name="org.slf4j"/>
     </dependencies>
 </module>

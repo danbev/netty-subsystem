@@ -17,12 +17,14 @@
 
 package org.jboss.aerogear.netty.extension.api;
 
+import java.util.concurrent.ThreadFactory;
+
 import org.jboss.as.network.SocketBinding;
 
 import io.netty.bootstrap.ServerBootstrap;
 
 public interface ServerBootstrapFactory {
     
-    ServerBootstrap createServerBootstrap(SocketBinding socketBinding);
+    ServerBootstrap createServerBootstrap(SocketBinding socketBinding, ThreadFactory threadFactory);
 
 }

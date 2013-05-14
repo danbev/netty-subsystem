@@ -17,6 +17,8 @@
 
 package org.jboss.aerogear.netty.extension;
 
+import java.util.concurrent.ThreadFactory;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 
@@ -34,7 +36,8 @@ public class NettyService implements Service<NettyService> {
 
     private final Logger logger = Logger.getLogger(NettyService.class);
 
-    private final InjectedValue<SocketBinding> socketBindingInj = new InjectedValue<SocketBinding>();
+    private final InjectedValue<SocketBinding> injectedSocketBinding = new InjectedValue<SocketBinding>();
+    private final InjectedValue<ThreadFactory> injectedThreadFactory = new InjectedValue<ThreadFactory>();
     private final String name;
     private final String factoryClass;
     private Channel channel;
@@ -47,8 +50,9 @@ public class NettyService implements Service<NettyService> {
     @Override
     public void start(final StartContext context) throws StartException {
         try {
-            final SocketBinding socketBinding = socketBindingInj.getValue();
-            final ServerBootstrap serverBootstrap = createServerBootstrap(factoryClass, socketBinding);
+            final ThreadFactory threadFactory = injectedThreadFactory.getOptionalValue();
+            final SocketBinding socketBinding = injectedSocketBinding.getValue();
+            final ServerBootstrap serverBootstrap = createServerBootstrap(factoryClass, socketBinding, threadFactory);
             logger.info("NettyService [" + name + "] binding to port [" + socketBinding.getPort() + "]");
             channel = serverBootstrap.bind(socketBinding.getPort()).sync().channel();
         } catch (final InterruptedException e) {
@@ -56,11 +60,13 @@ public class NettyService implements Service<NettyService> {
         }
     }
     
-    private ServerBootstrap createServerBootstrap(final String factoryClass, final SocketBinding socketBinding) throws StartException {
+    private ServerBootstrap createServerBootstrap(final String factoryClass, 
+            final SocketBinding socketBinding,
+            final ThreadFactory threadFactory) throws StartException {
         try {
             final Class<?> type = Class.forName(factoryClass);
             final ServerBootstrapFactory factory = (ServerBootstrapFactory) type.newInstance();
-            return factory.createServerBootstrap(socketBinding);
+            return factory.createServerBootstrap(socketBinding, threadFactory);
         } catch (final Exception e) {
             throw new StartException(e.getMessage());
         }
@@ -73,7 +79,11 @@ public class NettyService implements Service<NettyService> {
     }
     
     public InjectedValue<SocketBinding> getInjectedSocketBinding() {
-        return socketBindingInj;
+        return injectedSocketBinding;
+    }
+    
+    public InjectedValue<ThreadFactory> getInjectedThreadFactory() {
+        return injectedThreadFactory;
     }
     
     @Override

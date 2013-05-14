@@ -22,6 +22,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
+import java.util.concurrent.ThreadFactory;
+
 import org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory;
 import org.jboss.aerogear.simplepush.server.datastore.DataStore;
 import org.jboss.aerogear.simplepush.server.datastore.InMemoryDataStore;
@@ -31,16 +33,24 @@ import org.jboss.as.network.SocketBinding;
 public class SimplePushBootstrapFactory implements ServerBootstrapFactory {
 
     @Override
-    public ServerBootstrap createServerBootstrap(final SocketBinding socketBinding) {
+    public ServerBootstrap createServerBootstrap(final SocketBinding socketBinding, final ThreadFactory threadFactory) {
         final DataStore datastore = new InMemoryDataStore();
         final WebSocketChannelInitializer channelInitializer = new WebSocketChannelInitializer(datastore, false);
-        final EventLoopGroup bossGroup = new NioEventLoopGroup();
-        final EventLoopGroup workerGroup = new NioEventLoopGroup();
+        final EventLoopGroup bossGroup = newEventLoopGroup(threadFactory);
+        final EventLoopGroup workerGroup = newEventLoopGroup(threadFactory);
         final ServerBootstrap sb = new ServerBootstrap();
         sb.group(bossGroup, workerGroup)
         .channel(NioServerSocketChannel.class)
         .childHandler(channelInitializer);
         return sb;
+    }
+    
+    private EventLoopGroup newEventLoopGroup(final ThreadFactory threadFactory) {
+        if (threadFactory == null) {
+            return new NioEventLoopGroup(NioEventLoopGroup.DEFAULT_EVENT_LOOP_THREADS, threadFactory);
+        } else {
+            return new NioEventLoopGroup();
+        }
     }
 
 }

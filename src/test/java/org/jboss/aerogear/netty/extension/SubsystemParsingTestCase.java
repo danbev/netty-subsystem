@@ -37,18 +37,24 @@ import org.jboss.as.subsystem.test.AbstractSubsystemTest;
 import org.jboss.as.subsystem.test.AdditionalInitialization;
 import org.jboss.as.subsystem.test.ControllerInitializer;
 import org.jboss.as.subsystem.test.KernelServices;
+import org.jboss.as.threads.ThreadFactoryService;
+import org.jboss.as.threads.ThreadsServices;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceNotFoundException;
+import org.jboss.msc.service.ServiceTarget;
 import org.junit.Test;
+
+import com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef;
 
 public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     
     private final String subsystemXml =
-                "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
-                        "   <netty>" +
-                        "       <server name=\"simplepush\" socket-binding=\"simplepush\" factoryClass=\"" + MockServerBootstrapFactory.class.getName() + "\"/>" +
-                        "   </netty>" +
-                        "</subsystem>";
+        "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
+            "   <netty>" +
+            "       <server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" factoryClass=\"" + MockServerBootstrapFactory.class.getName() + "\"/>" +
+            "   </netty>" +
+        "</subsystem>";
 
     public SubsystemParsingTestCase() {
         super(NettyExtension.SUBSYSTEM_NAME, new NettyExtension());
@@ -74,8 +80,8 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(operations.size(), is(2));
         final ModelNode addType = operations.get(1);
         assertThat(addType.get(OP).asString(), equalTo(ADD));
-        assertThat(addType.get(NettyExtension.SOCKET_BINDING).asString(), is("simplepush"));
-        assertThat(addType.get(NettyExtension.FACTORY_CLASS).asString(), equalTo(MockServerBootstrapFactory.class.getName()));
+        assertThat(addType.get(ServerDefinition.SOCKET_BINDING).asString(), is("simplepush"));
+        assertThat(addType.get(ServerDefinition.FACTORY_CLASS).asString(), equalTo(MockServerBootstrapFactory.class.getName()));
         
         final PathAddress addr = PathAddress.pathAddress(addType.get(OP_ADDR));
         assertThat(addr.size(), is(2));
@@ -99,6 +105,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("factoryClass"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "socket-binding").asString(), is("simplepush"));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "factoryClass").asString(), is(MockServerBootstrapFactory.class.getName()));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "thread-factory").asString(), is("netty-thread-factory"));
     }
 
     @Test
@@ -148,15 +155,6 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         services.getContainer().getRequiredService(NettyService.createServiceName("simplepush"));
     }
     
-    private static class SocketBindingInit extends AdditionalInitialization {
-        @Override
-        protected void setupController(ControllerInitializer controllerInitializer) {
-            controllerInitializer.setBindAddress("127.0.0.1");
-            controllerInitializer.addSocketBinding("mysocket", 8888);
-            controllerInitializer.addSocketBinding("simplepush", 7777);
-        }
-    }
-
     @Test 
     public void executeOperations() throws Exception {
         final KernelServices services = super.installInController(new SocketBindingInit(), subsystemXml);
@@ -170,6 +168,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         addOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
         addOp.get("socket-binding").set("mysocket");
         addOp.get("factoryClass").set(MockServerBootstrapFactory.class.getName());
+        addOp.get("thread-factory").set("netty-thread-factory");
         final ModelNode result = services.executeOperation(addOp);
         assertThat(result.get(OUTCOME).asString(), equalTo(SUCCESS));
 
@@ -184,8 +183,9 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("foo"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo").hasDefined("socket-binding"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "socket-binding").asString(), is("mysocket"));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "thread-factory").asString(), is("netty-thread-factory"));
 
-        // TODO: should the port be updatable?
+        // TODO: should the socketbinding be updatable?
         /*
         final ModelNode writeOp = new ModelNode();
         writeOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
@@ -206,5 +206,25 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
         final NettyService service = (NettyService) services.getContainer().getService(NettyService.createServiceName("foo")).getValue();
         */
+    }
+
+    private static class SocketBindingInit extends AdditionalInitialization {
+        
+        @Override
+        protected void setupController(ControllerInitializer controllerInitializer) {
+            controllerInitializer.setBindAddress("127.0.0.1");
+            controllerInitializer.addSocketBinding("mysocket", 8888);
+            controllerInitializer.addSocketBinding("simplepush", 7777);
+        }
+        
+        @Override
+        protected void addExtraServices(ServiceTarget serviceTarget) {
+            final ThreadFactoryService threadFactoryService = new ThreadFactoryService();
+            threadFactoryService.setNamePattern("%i");
+            threadFactoryService.setPriority(Thread.NORM_PRIORITY);
+            threadFactoryService.setThreadGroupName("netty-thread-group");
+            final ServiceBuilder<?> serviceBuilder = serviceTarget.addService(ThreadsServices.threadFactoryName("netty-thread-factory"), threadFactoryService);
+            serviceBuilder.install();
+        }
     }
 }

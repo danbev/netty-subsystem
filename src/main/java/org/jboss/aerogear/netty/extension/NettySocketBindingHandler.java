@@ -29,7 +29,7 @@ class NettySocketBindingHandler extends AbstractWriteAttributeHandler<Void> {
     public static final NettySocketBindingHandler INSTANCE = new NettySocketBindingHandler();
 
     private NettySocketBindingHandler() {
-        super(ServerDefinition.SOCKET_BINDING);
+        super(ServerDefinition.SOCKET_BINDING_ATTR);
     }
 
     protected boolean applyUpdateToRuntime(final OperationContext context, 
@@ -39,7 +39,7 @@ class NettySocketBindingHandler extends AbstractWriteAttributeHandler<Void> {
             final ModelNode currentValue, 
             final HandbackHolder<Void> handbackHolder) throws OperationFailedException {
         
-        if (attributeName.equals(NettyExtension.SOCKET_BINDING)) {
+        if (attributeName.equals(ServerDefinition.SOCKET_BINDING)) {
             final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
             final NettyService service = (NettyService) context.getServiceRegistry(true).getRequiredService(NettyService.createServiceName(serverName)).getValue();
             context.completeStep();

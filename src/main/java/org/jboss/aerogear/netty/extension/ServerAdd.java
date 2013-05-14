@@ -18,6 +18,7 @@
 package org.jboss.aerogear.netty.extension;
 
 import java.util.List;
+import java.util.concurrent.ThreadFactory;
 
 import org.jboss.as.controller.AbstractAddStepHandler;
 import org.jboss.as.controller.OperationContext;
@@ -26,6 +27,7 @@ import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.network.SocketBinding;
+import org.jboss.as.threads.ThreadsServices;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
@@ -41,8 +43,9 @@ class ServerAdd extends AbstractAddStepHandler {
    
     @Override
     protected void populateModel(final ModelNode operation, final ModelNode model) throws OperationFailedException {
-        ServerDefinition.SOCKET_BINDING.validateAndSet(operation, model);
-        ServerDefinition.FACTORY_CLASS.validateAndSet(operation, model);
+        ServerDefinition.SOCKET_BINDING_ATTR.validateAndSet(operation, model);
+        ServerDefinition.FACTORY_CLASS_ATTR.validateAndSet(operation, model);
+        ServerDefinition.THREAD_FACTORY_ATTR.validateAndSet(operation, model);
     }
 
     @Override
@@ -51,17 +54,23 @@ class ServerAdd extends AbstractAddStepHandler {
             final ModelNode model,
             final ServiceVerificationHandler verificationHandler, 
             final List<ServiceController<?>> newControllers) throws OperationFailedException {
-        final String factoryClass = ServerDefinition.FACTORY_CLASS.resolveModelAttribute(context, model).asString();
-        final String socketBinding = ServerDefinition.SOCKET_BINDING.resolveModelAttribute(context, model).asString();
-        final ServiceName socketName = SocketBinding.JBOSS_BINDING_NAME.append(socketBinding);
+        final String factoryClass = ServerDefinition.FACTORY_CLASS_ATTR.resolveModelAttribute(context, model).asString();
+        final String socketBinding = ServerDefinition.SOCKET_BINDING_ATTR.resolveModelAttribute(context, model).asString();
+        final ModelNode threadFactoryNode = ServerDefinition.THREAD_FACTORY_ATTR.resolveModelAttribute(context, model);
+        
+        final ServiceName socketBindingServiceName = SocketBinding.JBOSS_BINDING_NAME.append(socketBinding);
         
         final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         final NettyService service = new NettyService(serverName, factoryClass);
         
         final ServiceName name = NettyService.createServiceName(serverName);
         final ServiceBuilder<NettyService> sb = context.getServiceTarget().addService(name, service);
-        sb.addDependency(socketName, SocketBinding.class, service.getInjectedSocketBinding());
-        sb.addListener(verificationHandler).setInitialMode(Mode.ACTIVE);
+        sb.addDependency(socketBindingServiceName, SocketBinding.class, service.getInjectedSocketBinding());
+        if (threadFactoryNode.isDefined()) {
+            sb.addDependency(ThreadsServices.threadFactoryName(threadFactoryNode.asString()), ThreadFactory.class, service.getInjectedThreadFactory());
+        }
+        sb.addListener(verificationHandler);
+        sb.setInitialMode(Mode.ACTIVE);
         final ServiceController<NettyService> controller = sb.install();
         newControllers.add(controller);
     }

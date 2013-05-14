@@ -48,7 +48,7 @@ import org.jboss.staxmapper.XMLExtendedStreamWriter;
 
 
 /**
- * Netty Server subsystem for AS 7.x
+ * Netty Server subsystem for AS 7.x/WildFly
  */
 public class NettyExtension implements Extension {
 
@@ -70,8 +70,6 @@ public class NettyExtension implements Extension {
     private static final String RESOURCE_NAME = NettyExtension.class.getPackage().getName() + ".LocalDescriptions";
 
     protected static final String SERVER = "server";
-    protected static final String SOCKET_BINDING = "socket-binding";
-    protected static final String FACTORY_CLASS = "factoryClass";
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
     protected static final PathElement SERVER_PATH = PathElement.pathElement(SERVER);
 
@@ -134,12 +132,14 @@ public class NettyExtension implements Extension {
             for (int i = 0; i < count; i++) {
                 final String attr = reader.getAttributeLocalName(i);
                 final String value = reader.getAttributeValue(i);
-                if (attr.equals(SOCKET_BINDING)) {
-                    ServerDefinition.SOCKET_BINDING.parseAndSetParameter(value, addTypeOperation, reader);
+                if (attr.equals(ServerDefinition.SOCKET_BINDING)) {
+                    ServerDefinition.SOCKET_BINDING_ATTR.parseAndSetParameter(value, addTypeOperation, reader);
                 } else if (attr.equals("name")) {
                     name = value;
-                }  else if (attr.equals(FACTORY_CLASS)) {
-                    ServerDefinition.FACTORY_CLASS.parseAndSetParameter(value, addTypeOperation, reader);
+                }  else if (attr.equals(ServerDefinition.FACTORY_CLASS)) {
+                    ServerDefinition.FACTORY_CLASS_ATTR.parseAndSetParameter(value, addTypeOperation, reader);
+                }  else if (attr.equals(ServerDefinition.THREAD_FACTORY)) {
+                    ServerDefinition.THREAD_FACTORY_ATTR.parseAndSetParameter(value, addTypeOperation, reader);
                 } else {
                     throw ParseUtils.unexpectedAttribute(reader, i);
                 }
@@ -169,8 +169,9 @@ public class NettyExtension implements Extension {
                 writer.writeStartElement(SERVER);
                 writer.writeAttribute("name", property.getName());
                 final ModelNode entry = property.getValue();
-                ServerDefinition.SOCKET_BINDING.marshallAsAttribute(entry, true, writer);
-                ServerDefinition.FACTORY_CLASS.marshallAsAttribute(entry, true, writer);
+                ServerDefinition.SOCKET_BINDING_ATTR.marshallAsAttribute(entry, true, writer);
+                ServerDefinition.FACTORY_CLASS_ATTR.marshallAsAttribute(entry, true, writer);
+                ServerDefinition.THREAD_FACTORY_ATTR.marshallAsAttribute(entry, true, writer);
                 writer.writeEndElement();
             }
             writer.writeEndElement();
