@@ -48,7 +48,7 @@ public class NettyService implements Service<NettyService> {
     }
     
     @Override
-    public void start(final StartContext context) throws StartException {
+    public synchronized  void start(final StartContext context) throws StartException {
         try {
             final ThreadFactory threadFactory = injectedThreadFactory.getOptionalValue();
             final SocketBinding socketBinding = injectedSocketBinding.getValue();
@@ -73,7 +73,7 @@ public class NettyService implements Service<NettyService> {
     }
 
     @Override
-    public void stop(StopContext context) {
+    public synchronized void stop(StopContext context) {
         logger.info("NettyService [" + name + "] shutting down.");
         channel.eventLoop().shutdownGracefully();
     }

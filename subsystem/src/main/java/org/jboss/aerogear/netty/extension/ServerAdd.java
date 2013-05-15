@@ -58,21 +58,18 @@ class ServerAdd extends AbstractAddStepHandler {
         final String socketBinding = ServerDefinition.SOCKET_BINDING_ATTR.resolveModelAttribute(context, model).asString();
         final ModelNode threadFactoryNode = ServerDefinition.THREAD_FACTORY_ATTR.resolveModelAttribute(context, model);
         
-        final ServiceName socketBindingServiceName = SocketBinding.JBOSS_BINDING_NAME.append(socketBinding);
-        
         final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        final NettyService service = new NettyService(serverName, factoryClass);
+        final NettyService nettyService = new NettyService(serverName, factoryClass);
         
         final ServiceName name = NettyService.createServiceName(serverName);
-        final ServiceBuilder<NettyService> sb = context.getServiceTarget().addService(name, service);
-        sb.addDependency(socketBindingServiceName, SocketBinding.class, service.getInjectedSocketBinding());
+        final ServiceBuilder<NettyService> sb = context.getServiceTarget().addService(name, nettyService);
+        sb.addDependency(SocketBinding.JBOSS_BINDING_NAME.append(socketBinding), SocketBinding.class, nettyService.getInjectedSocketBinding());
         if (threadFactoryNode.isDefined()) {
-            sb.addDependency(ThreadsServices.threadFactoryName(threadFactoryNode.asString()), ThreadFactory.class, service.getInjectedThreadFactory());
+            sb.addDependency(ThreadsServices.threadFactoryName(threadFactoryNode.asString()), ThreadFactory.class, nettyService.getInjectedThreadFactory());
         }
         sb.addListener(verificationHandler);
         sb.setInitialMode(Mode.ACTIVE);
-        final ServiceController<NettyService> controller = sb.install();
-        newControllers.add(controller);
+        newControllers.add(sb.install());
     }
     
 }

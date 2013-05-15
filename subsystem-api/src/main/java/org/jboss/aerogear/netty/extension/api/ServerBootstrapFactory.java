@@ -23,8 +23,18 @@ import org.jboss.as.network.SocketBinding;
 
 import io.netty.bootstrap.ServerBootstrap;
 
+/**
+ * A factory for creating {@link ServerBootstrap} instances.
+ */
 public interface ServerBootstrapFactory {
     
+    /**
+     * Sole factory method.
+     * 
+     * @param socketBinding the {@link SocketBinding} provided by WildFly.
+     * @param threadFactory the {@link ThreadFactory} provided by WildFly, or null if no thread-factory was configured.
+     * @return {@code ServerBootstrap} the {@link ServerBootstrap}.
+     */
     ServerBootstrap createServerBootstrap(SocketBinding socketBinding, ThreadFactory threadFactory);
 
 }

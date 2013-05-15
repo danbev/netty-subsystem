@@ -45,8 +45,6 @@ import org.jboss.msc.service.ServiceNotFoundException;
 import org.jboss.msc.service.ServiceTarget;
 import org.junit.Test;
 
-import com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef;
-
 public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     
     private final String subsystemXml =
@@ -95,7 +93,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
     @Test
     public void installIntoController() throws Exception {
-        final KernelServices services = super.installInController(new SocketBindingInit(), subsystemXml);
+        final KernelServices services = super.installInController(new AdditionalServices(), subsystemXml);
 
         final ModelNode model = services.readWholeModel();
         assertThat(model.get(SUBSYSTEM).hasDefined(NettyExtension.SUBSYSTEM_NAME), is(true));
@@ -110,16 +108,13 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
     @Test
     public void parseAndMarshalModel() throws Exception {
-        final KernelServices servicesA = super.installInController(new SocketBindingInit(), subsystemXml);
-        //Get the model and the persisted xml from the first controller
+        final KernelServices servicesA = super.installInController(new AdditionalServices(), subsystemXml);
         final ModelNode modelA = servicesA.readWholeModel();
         final String marshalled = servicesA.getPersistedSubsystemXml();
 
-        //Install the persisted xml from the first controller into a second controller
-        final KernelServices servicesB = super.installInController(new SocketBindingInit(), marshalled);
+        final KernelServices servicesB = super.installInController(new AdditionalServices(), marshalled);
         final ModelNode modelB = servicesB.readWholeModel();
 
-        //Make sure the models from the two controllers are identical
         super.compare(modelA, modelB);
     }
 
@@ -128,7 +123,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         final String subsystemXml =
                 "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
                         "</subsystem>";
-        final KernelServices servicesA = super.installInController(new SocketBindingInit(), subsystemXml);
+        final KernelServices servicesA = super.installInController(new AdditionalServices(), subsystemXml);
         
         final ModelNode modelA = servicesA.readWholeModel();
         final ModelNode describeOp = new ModelNode();
@@ -138,18 +133,15 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
                         PathElement.pathElement(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME)).toModelNode());
         final List<ModelNode> operations = super.checkResultAndGetContents(servicesA.executeOperation(describeOp)).asList();
 
-        //Install the describe options from the first controller into a second controller
-        final KernelServices servicesB = super.installInController(new SocketBindingInit(), operations);
+        final KernelServices servicesB = super.installInController(new AdditionalServices(), operations);
         final ModelNode modelB = servicesB.readWholeModel();
-
-        //Make sure the models from the two controllers are identical
         super.compare(modelA, modelB);
 
     }
 
     @Test (expected = ServiceNotFoundException.class)
     public void subsystemRemoval() throws Exception {
-        final KernelServices services = super.installInController(new SocketBindingInit(), subsystemXml);
+        final KernelServices services = super.installInController(new AdditionalServices(), subsystemXml);
         services.getContainer().getRequiredService(NettyService.createServiceName("simplepush"));
         super.assertRemoveSubsystemResources(services);
         services.getContainer().getRequiredService(NettyService.createServiceName("simplepush"));
@@ -157,21 +149,19 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     
     @Test 
     public void executeOperations() throws Exception {
-        final KernelServices services = super.installInController(new SocketBindingInit(), subsystemXml);
+        final KernelServices services = super.installInController(new AdditionalServices(), subsystemXml);
 
-        //Add another type
-        final PathAddress fooTypeAddr = PathAddress.pathAddress(
+        final PathAddress fooServer = PathAddress.pathAddress(
                 PathElement.pathElement(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME),
                 PathElement.pathElement("server", "foo"));
         final ModelNode addOp = new ModelNode();
         addOp.get(OP).set(ADD);
-        addOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
+        addOp.get(OP_ADDR).set(fooServer.toModelNode());
         addOp.get("socket-binding").set("mysocket");
         addOp.get("factoryClass").set(MockServerBootstrapFactory.class.getName());
         addOp.get("thread-factory").set("netty-thread-factory");
         final ModelNode result = services.executeOperation(addOp);
         assertThat(result.get(OUTCOME).asString(), equalTo(SUCCESS));
-
 
         final ModelNode model = services.readWholeModel();
         assertThat(model.get(SUBSYSTEM).hasDefined(NettyExtension.SUBSYSTEM_NAME), is(true));
@@ -184,41 +174,19 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo").hasDefined("socket-binding"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "socket-binding").asString(), is("mysocket"));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "thread-factory").asString(), is("netty-thread-factory"));
-
-        // TODO: should the socketbinding be updatable?
-        /*
-        final ModelNode writeOp = new ModelNode();
-        writeOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
-        writeOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        writeOp.get(NAME).set("simplepush2");
-        writeOp.get("socket-binding").set("mysocket");
-        writeOp.get("factoryClass").set(MockServerBootstrapFactory.class.getName());
-        final ModelNode result2 = services.executeOperation(writeOp);
-        assertThat(result2.get(OUTCOME).asString(), is(SUCCESS));
-
-        //Check that write attribute took effect, this time by calling read-attribute instead of reading the whole model
-        final ModelNode readOp = new ModelNode();
-        readOp.get(OP).set(READ_ATTRIBUTE_OPERATION);
-        readOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
-        readOp.get(NAME).set("port");
-        final ModelNode result3 = services.executeOperation(readOp);
-        assertThat(checkResultAndGetContents(result3).asLong(), is(3456L));
-
-        final NettyService service = (NettyService) services.getContainer().getService(NettyService.createServiceName("foo")).getValue();
-        */
     }
 
-    private static class SocketBindingInit extends AdditionalInitialization {
+    private static class AdditionalServices extends AdditionalInitialization {
         
         @Override
-        protected void setupController(ControllerInitializer controllerInitializer) {
+        protected void setupController(final ControllerInitializer controllerInitializer) {
             controllerInitializer.setBindAddress("127.0.0.1");
             controllerInitializer.addSocketBinding("mysocket", 8888);
             controllerInitializer.addSocketBinding("simplepush", 7777);
         }
         
         @Override
-        protected void addExtraServices(ServiceTarget serviceTarget) {
+        protected void addExtraServices(final ServiceTarget serviceTarget) {
             final ThreadFactoryService threadFactoryService = new ThreadFactoryService();
             threadFactoryService.setNamePattern("%i");
             threadFactoryService.setPriority(Thread.NORM_PRIORITY);

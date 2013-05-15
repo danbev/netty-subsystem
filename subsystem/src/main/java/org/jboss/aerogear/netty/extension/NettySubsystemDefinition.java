@@ -40,7 +40,7 @@ public class NettySubsystemDefinition extends SimpleResourceDefinition {
      * Registers an add operation handler or a remove operation handler if one was provided to the constructor.
      */
     @Override
-    public void registerOperations(ManagementResourceRegistration resourceRegistration) {
+    public void registerOperations(final ManagementResourceRegistration resourceRegistration) {
         super.registerOperations(resourceRegistration);
         resourceRegistration.registerOperationHandler(DESCRIBE, GenericSubsystemDescribeHandler.INSTANCE, GenericSubsystemDescribeHandler.INSTANCE, false, OperationEntry.EntryType.PRIVATE);
     }

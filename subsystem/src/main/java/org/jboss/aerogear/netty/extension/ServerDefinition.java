@@ -30,6 +30,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
     protected static final String SOCKET_BINDING = "socket-binding";
     protected static final String THREAD_FACTORY = "thread-factory";
     protected static final String FACTORY_CLASS = "factoryClass";
+    protected static final String SERVER_NAME = "name";
     
     protected static final SimpleAttributeDefinition SOCKET_BINDING_ATTR = new SimpleAttributeDefinition(SOCKET_BINDING, ModelType.STRING, false);
     protected static final SimpleAttributeDefinition FACTORY_CLASS_ATTR = new SimpleAttributeDefinition(FACTORY_CLASS, ModelType.STRING, false);
@@ -37,7 +38,6 @@ public class ServerDefinition extends SimpleResourceDefinition {
     
     public static final ServerDefinition INSTANCE = new ServerDefinition();
 
-    
     private ServerDefinition() {
         super(SERVER_PATH,
                 NettyExtension.getResourceDescriptionResolver(SERVER),
