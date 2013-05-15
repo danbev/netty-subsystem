@@ -65,8 +65,8 @@ The socket-binding to be used for this Netty server instance.
 __factoryClass__  
 This is a class that implements _org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory_ and is responsible for 
 creating a [ServerBootstrap](http://netty.io/4.0/api/io/netty/bootstrap/ServerBootstrap.html). This allows the end user to
-configure the Netty server application with the appropriate _Channel_, _ChannelPipeline_ etc.  
-The sole method, _createServerBootstrap_, takes a single parameter which is a [SocketBinding](https://github.com/wildfly/wildfly/blob/master/network/src/main/java/org/jboss/as/network/SocketBinding.java) instance:
+configure the Netty server application with the appropriate _Channel_, _ChannelPipeline_ etc. The sole method, 
+_createServerBootstrap_, takes a single parameter which is a [SocketBinding](https://github.com/wildfly/wildfly/blob/master/network/src/main/java/org/jboss/as/network/SocketBinding.java) instance:
 
     public interface ServerBootstrapFactory {
         ServerBootstrap createServerBootstrap(SocketBinding socketBinding);
