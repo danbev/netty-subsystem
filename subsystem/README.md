@@ -17,7 +17,7 @@ A JBoss Modules module will be generated in _target/module/org/jboss/aerogear/ne
 ## Installation
 Copy the module produced by ```mvn package``` to the _modules_ directory of the application server.
 
-    cp -r target/module $WILDFLY_HOME/modules
+    cp -r target/module/org $WILDFLY_HOME/modules
 
 ## Usage
 
@@ -73,7 +73,7 @@ The sole method, _createServerBootstrap_, takes a single parameter which is a [S
     }
     
 The _ServerBoostrapFactory_ interface is in a separate module so that it can be included as a dependency in other projects, please
-see the _subsystem-api_ for more details.
+see the [subsystem-api](https://github.com/danbev/netty-subsystem/tree/master/subsystem-api) for more details.
 
     
 ## References
