@@ -1,12 +1,8 @@
 <module xmlns="urn:jboss:module:1.0" name="org.jboss.aerogear.netty">
     <resources>
-        <resource-root path="netty-subsystem.jar"/>
-        <resource-root path="aerogear-simplepush-server.jar"/>
-        <resource-root path="netty-all.jar"/>
-        <resource-root path="slf4j-api.jar"/>
-        <!--resource-root path="slf4j-simple.jar"/-->
-        <resource-root path="jackson-core-asl.jar"/>
-        <resource-root path="jackson-mapper-asl.jar"/>
+        <resource-root path="netty-subsystem-1.0.0-SNAPSHOT.jar"/>
+        <resource-root path="netty-subsystem-api-1.0.0-SNAPSHOT.jar"/>
+        <resource-root path="netty-all-4.0.0.CR2.jar"/>
     </resources>
     
     <dependencies>

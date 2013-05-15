@@ -8,13 +8,6 @@ The goal is to enable users to configure one or more Netty server applications t
 
 __This is a work in progress and not complete__.
 
-## Prerequisites
-This project has a dependency to aerogear-simplepush-server which will be removed later:
-
-    git clone git@github.com:danbev/aerogear-simplepush-server.git
-    cd aerogear-simplepush-server
-    mvn install
-    
 ## Building
 
     mvn package
@@ -55,7 +48,7 @@ As an example, add the following elements to _$WILDFLYHOME/standalone/configurat
         ...
         <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
             <netty>
-                <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.jboss.aerogear.netty.extension.SimplePushBootstrapFactory"/>
+                <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.xyz.CustomBootstrapFactory"/>
                 ...
             </netty>
         </subsystem>
@@ -79,19 +72,12 @@ The sole method, _createServerBootstrap_, takes a single parameter which is a [S
         ServerBootstrap createServerBootstrap(SocketBinding socketBinding);
     }
     
-The _ServerBoostrapFactory_ interface is currently part of this project but should be extracted to a separate dependency so it would 
-be the only dependency that a project wanting to integrate with WildFly would have to implement.
+The _ServerBoostrapFactory_ interface is in a separate module so that it can be included as a dependency in other projects, please
+see the _subsystem-api_ for more details.
 
-### Start WildFly
-
-    ./standalone.sh
-
-If you inspect the server console output you'll see the following message:
-
-    08:56:13,052 INFO  [org.jboss.aerogear.netty.extension.NettyService] (MSC service thread 1-3) NettyService [simplepush-server] binding to port [7777]    
     
-    
-
+## References
+* [simplepush-server-wildfly](https://github.com/danbev/aerogear-simplepush-server/tree/master/wildfly-module)
 
     
     
