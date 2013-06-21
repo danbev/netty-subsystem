@@ -54,7 +54,8 @@ As an example, add the following elements to _$WILDFLYHOME/standalone/configurat
         ...
         <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
             <netty>
-                <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.xyz.CustomBootstrapFactory" thread-factory="netty-thread-factory"/>
+                <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.xyz.CustomBootstrapFactory" 
+                    thread-factory="netty-thread-factory"/>
                 ...
             </netty>
         </subsystem>
@@ -81,7 +82,7 @@ _createServerBootstrap_, takes a single parameter which is a [SocketBinding](htt
 The _ServerBoostrapFactory_ interface is in a separate module so that it can be included as a dependency in other projects, please
 see the [subsystem-api](https://github.com/danbev/netty-subsystem/tree/master/subsystem-api) for more details.
 
-__thread-factory__
+__thread-factory__  
 Thread factory that will be passed along to Netty when creating.
 
     
