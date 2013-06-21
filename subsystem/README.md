@@ -41,6 +41,12 @@ As an example, add the following elements to _$WILDFLYHOME/standalone/configurat
         ...
         <socket-binding name="simplepush" port="7777"/>
     </socket-binding-group>  
+    
+#### Add a thread-factory    
+
+    <subsystem xmlns="urn:jboss:domain:threads:1.1">
+        <thread-factory name="netty-thread-factory" group-name="netty-thread-group" thread-name-pattern="%i" priority="5"/>
+    </subsystem>
 
 #### Add the Netty subsystem
 
@@ -48,7 +54,7 @@ As an example, add the following elements to _$WILDFLYHOME/standalone/configurat
         ...
         <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
             <netty>
-                <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.xyz.CustomBootstrapFactory"/>
+                <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.xyz.CustomBootstrapFactory" thread-factory="netty-thread-factory"/>
                 ...
             </netty>
         </subsystem>
@@ -69,11 +75,14 @@ configure the Netty server application with the appropriate _Channel_, _ChannelP
 _createServerBootstrap_, takes a single parameter which is a [SocketBinding](https://github.com/wildfly/wildfly/blob/master/network/src/main/java/org/jboss/as/network/SocketBinding.java) instance:
 
     public interface ServerBootstrapFactory {
-        ServerBootstrap createServerBootstrap(SocketBinding socketBinding);
+        ServerBootstrap createServerBootstrap(SocketBinding socketBinding, ThreadFactory threadFactory);
     }
     
 The _ServerBoostrapFactory_ interface is in a separate module so that it can be included as a dependency in other projects, please
 see the [subsystem-api](https://github.com/danbev/netty-subsystem/tree/master/subsystem-api) for more details.
+
+__thread-factory__
+Thread factory that will be passed along to Netty when creating.
 
     
 ## References

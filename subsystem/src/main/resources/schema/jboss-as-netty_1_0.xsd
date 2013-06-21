@@ -17,5 +17,6 @@
         <xs:attribute name="name" use="required"/>
         <xs:attribute name="socket-binding" type="xs:string" use="required"/>
         <xs:attribute name="factoryClass" type="xs:string"/>
+        <xs:attribute name="thread-factory" type="xs:string"/>
     </xs:complexType>
 </xs:schema>
