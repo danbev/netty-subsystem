@@ -2,7 +2,7 @@
     <resources>
         <resource-root path="netty-subsystem-1.0.0-SNAPSHOT.jar"/>
         <resource-root path="netty-subsystem-api-1.0.0-SNAPSHOT.jar"/>
-        <resource-root path="netty-all-4.0.0.CR2.jar"/>
+        <resource-root path="netty-all-4.0.0.CR7-SNAPSHOT.jar"/>
     </resources>
     
     <dependencies>
