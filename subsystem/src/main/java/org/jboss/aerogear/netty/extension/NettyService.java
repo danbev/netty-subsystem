@@ -54,7 +54,7 @@ public class NettyService implements Service<NettyService> {
             final SocketBinding socketBinding = injectedSocketBinding.getValue();
             final ServerBootstrap serverBootstrap = createServerBootstrap(factoryClass, socketBinding, threadFactory);
             logger.info("NettyService [" + name + "] binding to port [" + socketBinding.getPort() + "]");
-            channel = serverBootstrap.bind(socketBinding.getPort()).sync().channel();
+            channel = serverBootstrap.bind(socketBinding.getAddress(), socketBinding.getPort()).sync().channel();
         } catch (final InterruptedException e) {
             throw new StartException(e);
         }
