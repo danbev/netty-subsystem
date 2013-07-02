@@ -122,7 +122,7 @@
                                <copy file="src/main/resources/module/main/module.xml" tofile="${module.dir}/module.xml" />
                                <copy file="target/${project.artifactId}.jar" tofile="${module.dir}/${project.artifactId}-${project.version}.jar" />
                                <copy file="target/deps/netty-subsystem-api-1.0.0-SNAPSHOT.jar" todir="${module.dir}" />
-                               <copy file="target/deps/netty-all-4.0.0.CR7-SNAPSHOT.jar" todir="${module.dir}" />
+                               <copy file="target/deps/netty-all-4.0.0.CR10-SNAPSHOT.jar" todir="${module.dir}" />
                               <echo>Module ${module.name} has been created in the target/module directory. Copy to your JBoss AS 7 installation.</echo>
                             </target>
                         </configuration>
