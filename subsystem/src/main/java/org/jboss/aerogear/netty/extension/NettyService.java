@@ -68,7 +68,7 @@ public class NettyService implements Service<NettyService> {
             final ServerBootstrapFactory factory = (ServerBootstrapFactory) type.newInstance();
             return factory.createServerBootstrap(socketBinding, threadFactory);
         } catch (final Exception e) {
-            throw new StartException(e.getMessage());
+            throw new StartException(e.getMessage(), e);
         }
     }
 
