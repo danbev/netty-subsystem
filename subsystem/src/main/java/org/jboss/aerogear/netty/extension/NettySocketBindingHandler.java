@@ -39,7 +39,7 @@ class NettySocketBindingHandler extends AbstractWriteAttributeHandler<Void> {
             final ModelNode currentValue, 
             final HandbackHolder<Void> handbackHolder) throws OperationFailedException {
         
-        if (attributeName.equals(ServerDefinition.SOCKET_BINDING)) {
+        if (attributeName.equals(ServerDefinition.Element.SOCKET_BINDING.localName())) {
             final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
             final NettyService service = (NettyService) context.getServiceRegistry(true).getRequiredService(NettyService.createServiceName(serverName)).getValue();
             //TODO: support changing the socket-binding?

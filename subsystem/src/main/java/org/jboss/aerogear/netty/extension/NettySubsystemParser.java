@@ -20,6 +20,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
+import static org.jboss.as.controller.parsing.ParseUtils.unexpectedAttribute;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,22 +64,27 @@ public class NettySubsystemParser implements XMLStreamConstants, XMLElementReade
         
         final int count = reader.getAttributeCount();
         for (int i = 0; i < count; i++) {
-            final String attr = reader.getAttributeLocalName(i);
+            final String name = reader.getAttributeLocalName(i);
             final String value = reader.getAttributeValue(i);
-            if (attr.equals(ServerDefinition.SOCKET_BINDING)) {
+            switch (ServerDefinition.Element.of(name)) {
+            case SOCKET_BINDING:
                 ServerDefinition.SOCKET_BINDING_ATTR.parseAndSetParameter(value, addServerOperation, reader);
-            }  else if (attr.equals(ServerDefinition.FACTORY_CLASS)) {
+                break;
+            case FACTORY_CLASS:
                 ServerDefinition.FACTORY_CLASS_ATTR.parseAndSetParameter(value, addServerOperation, reader);
-            }  else if (attr.equals(ServerDefinition.THREAD_FACTORY)) {
+                break;
+            case THREAD_FACTORY:
                 ServerDefinition.THREAD_FACTORY_ATTR.parseAndSetParameter(value, addServerOperation, reader);
-            } else if (attr.equals(ServerDefinition.SERVER_NAME)) {
+                break;
+            case NAME:
                 if (value == null) {
-                    throw ParseUtils.missingRequiredElement(reader, Collections.singleton(ServerDefinition.SERVER_NAME));
+                    throw ParseUtils.missingRequiredElement(reader, Collections.singleton(ServerDefinition.Element.NAME.toString()));
                 }
                 final PathAddress addr = PathAddress.pathAddress(NettyExtension.SUBSYSTEM_PATH, PathElement.pathElement(NettyExtension.SERVER, value));
                 addServerOperation.get(OP_ADDR).set(addr.toModelNode());
-            } else {
-                throw ParseUtils.unexpectedAttribute(reader, i);
+                break;
+            default:
+                throw unexpectedAttribute(reader, i);
             }
         }
         ParseUtils.requireNoContent(reader);
@@ -95,12 +101,13 @@ public class NettySubsystemParser implements XMLStreamConstants, XMLElementReade
         final ModelNode type = node.get(NettyExtension.SERVER);
         for (Property property : type.asPropertyList()) {
             writer.writeStartElement(NettyExtension.SERVER);
-            writer.writeAttribute(ServerDefinition.SERVER_NAME, property.getName());
+            writer.writeAttribute(ServerDefinition.Element.NAME.localName(), property.getName());
             final ModelNode entry = property.getValue();
             ServerDefinition.SOCKET_BINDING_ATTR.marshallAsAttribute(entry, true, writer);
             ServerDefinition.FACTORY_CLASS_ATTR.marshallAsAttribute(entry, true, writer);
             ServerDefinition.THREAD_FACTORY_ATTR.marshallAsAttribute(entry, true, writer);
             writer.writeEndElement();
         }
+        writer.writeEndElement();
     }
 }

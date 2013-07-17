@@ -49,7 +49,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     
     private final String subsystemXml =
         "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
-            "<server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" factoryClass=\"" + MockServerBootstrapFactory.class.getName() + "\"/>" +
+            "<server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" factory-class=\"" + MockServerBootstrapFactory.class.getName() + "\"/>" +
         "</subsystem>";
 
     public SubsystemParsingTestCase() {
@@ -77,8 +77,8 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         final ModelNode addType = operations.get(1);
         System.out.println(addType);
         assertThat(addType.get(OP).asString(), equalTo(ADD));
-        assertThat(addType.get(ServerDefinition.SOCKET_BINDING).asString(), is("simplepush"));
-        assertThat(addType.get(ServerDefinition.FACTORY_CLASS).asString(), equalTo(MockServerBootstrapFactory.class.getName()));
+        assertThat(addType.get(ServerDefinition.Element.SOCKET_BINDING.localName()).asString(), is("simplepush"));
+        assertThat(addType.get(ServerDefinition.Element.FACTORY_CLASS.localName()).asString(), equalTo(MockServerBootstrapFactory.class.getName()));
         
         final PathAddress addr = PathAddress.pathAddress(addType.get(OP_ADDR));
         assertThat(addr.size(), is(2));
@@ -99,9 +99,9 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME).hasDefined("server"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("simplepush"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("socket-binding"), is(true));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("factoryClass"), is(true));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("factory-class"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "socket-binding").asString(), is("simplepush"));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "factoryClass").asString(), is(MockServerBootstrapFactory.class.getName()));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "factory-class").asString(), is(MockServerBootstrapFactory.class.getName()));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "thread-factory").asString(), is("netty-thread-factory"));
     }
 
@@ -155,7 +155,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         addOp.get(OP).set(ADD);
         addOp.get(OP_ADDR).set(serverAddress.toModelNode());
         addOp.get("socket-binding").set("mysocket");
-        addOp.get("factoryClass").set(MockServerBootstrapFactory.class.getName());
+        addOp.get("factory-class").set(MockServerBootstrapFactory.class.getName());
         addOp.get("thread-factory").set("netty-thread-factory");
         final ModelNode result = services.executeOperation(addOp);
         assertThat(result.get(OUTCOME).asString(), equalTo(SUCCESS));

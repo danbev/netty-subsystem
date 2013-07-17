@@ -20,6 +20,9 @@ package org.jboss.aerogear.netty.extension;
 import static org.jboss.aerogear.netty.extension.NettyExtension.SERVER;
 import static org.jboss.aerogear.netty.extension.NettyExtension.SERVER_PATH;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
@@ -27,14 +30,44 @@ import org.jboss.dmr.ModelType;
 
 public class ServerDefinition extends SimpleResourceDefinition {
     
-    protected static final String SOCKET_BINDING = "socket-binding";
-    protected static final String THREAD_FACTORY = "thread-factory";
-    protected static final String FACTORY_CLASS = "factoryClass";
-    protected static final String SERVER_NAME = "name";
+    public enum Element {
+        UNKNOWN(null),
+        SOCKET_BINDING("socket-binding"),
+        THREAD_FACTORY("thread-factory"),
+        FACTORY_CLASS("factory-class"),
+        NAME("name");
+        
+        private final String name;
+        
+        private Element(final String name) {
+            this.name = name;
+        }
+        
+        public String localName() {
+            return name;
+        }
+        
+        private static final Map<String, Element> MAP;
+
+        static {
+            final Map<String, Element> map = new HashMap<String, Element>();
+            for (Element element : values()) {
+                final String name = element.localName();
+                if (name != null) map.put(name, element);
+            }
+            MAP = map;
+        }
+
+        public static Element of(final String localName) {
+            final Element element = MAP.get(localName);
+            return element == null ? UNKNOWN : element;
+        }
+        
+    }
     
-    protected static final SimpleAttributeDefinition SOCKET_BINDING_ATTR = new SimpleAttributeDefinition(SOCKET_BINDING, ModelType.STRING, false);
-    protected static final SimpleAttributeDefinition FACTORY_CLASS_ATTR = new SimpleAttributeDefinition(FACTORY_CLASS, ModelType.STRING, false);
-    protected static final SimpleAttributeDefinition THREAD_FACTORY_ATTR = new SimpleAttributeDefinition(THREAD_FACTORY, ModelType.STRING, true);
+    protected static final SimpleAttributeDefinition SOCKET_BINDING_ATTR = new SimpleAttributeDefinition(Element.SOCKET_BINDING.localName(), ModelType.STRING, false);
+    protected static final SimpleAttributeDefinition FACTORY_CLASS_ATTR = new SimpleAttributeDefinition(Element.FACTORY_CLASS.localName(), ModelType.STRING, false);
+    protected static final SimpleAttributeDefinition THREAD_FACTORY_ATTR = new SimpleAttributeDefinition(Element.THREAD_FACTORY.localName(), ModelType.STRING, true);
     
     public static final ServerDefinition INSTANCE = new ServerDefinition();
 
