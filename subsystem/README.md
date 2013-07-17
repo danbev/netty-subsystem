@@ -53,11 +53,9 @@ As an example, add the following elements to _$WILDFLYHOME/standalone/configurat
     <profile>
         ...
         <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
-            <netty>
-                <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.xyz.CustomBootstrapFactory" 
-                    thread-factory="netty-thread-factory"/>
-                ...
-            </netty>
+            <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.xyz.CustomBootstrapFactory" 
+                thread-factory="netty-thread-factory"/>
+            ...
         </subsystem>
     </profile>    
     

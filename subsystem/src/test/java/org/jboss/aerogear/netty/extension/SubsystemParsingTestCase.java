@@ -49,9 +49,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     
     private final String subsystemXml =
         "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
-            "   <netty>" +
-            "       <server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" factoryClass=\"" + MockServerBootstrapFactory.class.getName() + "\"/>" +
-            "   </netty>" +
+            "<server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" factoryClass=\"" + MockServerBootstrapFactory.class.getName() + "\"/>" +
         "</subsystem>";
 
     public SubsystemParsingTestCase() {
@@ -61,8 +59,8 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     @Test
     public void parseAddSubsystem() throws Exception {
         final List<ModelNode> operations = super.parse(subsystemXml);
+        System.out.println(operations);
         assertThat(operations.size(), is(2));
-
         final ModelNode addSubsystem = operations.get(0);
         assertThat(addSubsystem.get(OP).asString(), equalTo(ADD));
         final PathAddress addr = PathAddress.pathAddress(addSubsystem.get(OP_ADDR));
@@ -77,6 +75,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         final List<ModelNode> operations = super.parse(subsystemXml);
         assertThat(operations.size(), is(2));
         final ModelNode addType = operations.get(1);
+        System.out.println(addType);
         assertThat(addType.get(OP).asString(), equalTo(ADD));
         assertThat(addType.get(ServerDefinition.SOCKET_BINDING).asString(), is("simplepush"));
         assertThat(addType.get(ServerDefinition.FACTORY_CLASS).asString(), equalTo(MockServerBootstrapFactory.class.getName()));
@@ -150,13 +149,11 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     @Test 
     public void executeOperations() throws Exception {
         final KernelServices services = super.installInController(new AdditionalServices(), subsystemXml);
-
-        final PathAddress fooServer = PathAddress.pathAddress(
-                PathElement.pathElement(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME),
+        final PathAddress serverAddress = PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME),
                 PathElement.pathElement("server", "foo"));
         final ModelNode addOp = new ModelNode();
         addOp.get(OP).set(ADD);
-        addOp.get(OP_ADDR).set(fooServer.toModelNode());
+        addOp.get(OP_ADDR).set(serverAddress.toModelNode());
         addOp.get("socket-binding").set("mysocket");
         addOp.get("factoryClass").set(MockServerBootstrapFactory.class.getName());
         addOp.get("thread-factory").set("netty-thread-factory");
