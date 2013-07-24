@@ -33,6 +33,7 @@ import java.util.List;
 
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.PathElement;
+import org.jboss.as.jpa.service.JPAService;
 import org.jboss.as.subsystem.test.AbstractSubsystemTest;
 import org.jboss.as.subsystem.test.AdditionalInitialization;
 import org.jboss.as.subsystem.test.ControllerInitializer;
@@ -46,7 +47,7 @@ import org.jboss.msc.service.ServiceTarget;
 import org.junit.Test;
 
 public class SubsystemParsingTestCase extends AbstractSubsystemTest {
-    
+
     private final String subsystemXml =
         "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
             "<server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" factory-class=\"" + MockServerBootstrapFactory.class.getName() + "\"/>" +
@@ -55,11 +56,10 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     public SubsystemParsingTestCase() {
         super(NettyExtension.SUBSYSTEM_NAME, new NettyExtension());
     }
-    
+
     @Test
     public void parseAddSubsystem() throws Exception {
         final List<ModelNode> operations = super.parse(subsystemXml);
-        System.out.println(operations);
         assertThat(operations.size(), is(2));
         final ModelNode addSubsystem = operations.get(0);
         assertThat(addSubsystem.get(OP).asString(), equalTo(ADD));
@@ -79,7 +79,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(addType.get(OP).asString(), equalTo(ADD));
         assertThat(addType.get(ServerDefinition.Element.SOCKET_BINDING.localName()).asString(), is("simplepush"));
         assertThat(addType.get(ServerDefinition.Element.FACTORY_CLASS.localName()).asString(), equalTo(MockServerBootstrapFactory.class.getName()));
-        
+
         final PathAddress addr = PathAddress.pathAddress(addType.get(OP_ADDR));
         assertThat(addr.size(), is(2));
         final PathElement firstPathElement = addr.getElement(0);
@@ -123,7 +123,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
                 "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
                         "</subsystem>";
         final KernelServices servicesA = super.installInController(new AdditionalServices(), subsystemXml);
-        
+
         final ModelNode modelA = servicesA.readWholeModel();
         final ModelNode describeOp = new ModelNode();
         describeOp.get(OP).set(DESCRIBE);
@@ -145,8 +145,8 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         super.assertRemoveSubsystemResources(services);
         services.getContainer().getRequiredService(NettyService.createServiceName("simplepush"));
     }
-    
-    @Test 
+
+    @Test
     public void executeOperations() throws Exception {
         final KernelServices services = super.installInController(new AdditionalServices(), subsystemXml);
         final PathAddress serverAddress = PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME),
@@ -174,14 +174,14 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     }
 
     private static class AdditionalServices extends AdditionalInitialization {
-        
+
         @Override
         protected void setupController(final ControllerInitializer controllerInitializer) {
             controllerInitializer.setBindAddress("127.0.0.1");
             controllerInitializer.addSocketBinding("mysocket", 8888);
             controllerInitializer.addSocketBinding("simplepush", 7777);
         }
-        
+
         @Override
         protected void addExtraServices(final ServiceTarget serviceTarget) {
             final ThreadFactoryService threadFactoryService = new ThreadFactoryService();
@@ -190,6 +190,10 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
             threadFactoryService.setThreadGroupName("netty-thread-group");
             final ServiceBuilder<?> serviceBuilder = serviceTarget.addService(ThreadsServices.threadFactoryName("netty-thread-factory"), threadFactoryService);
             serviceBuilder.install();
+
+            JPAService jpaService = new JPAService();
+            final ServiceBuilder<?> jpasb = serviceTarget.addService(JPAService.SERVICE_NAME, jpaService);
+            jpasb.install();
         }
     }
 }

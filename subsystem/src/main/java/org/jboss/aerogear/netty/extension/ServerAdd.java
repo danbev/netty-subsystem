@@ -26,6 +26,7 @@ import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
+import org.jboss.as.jpa.service.JPAService;
 import org.jboss.as.network.SocketBinding;
 import org.jboss.as.threads.ThreadsServices;
 import org.jboss.dmr.ModelNode;
@@ -40,7 +41,7 @@ class ServerAdd extends AbstractAddStepHandler {
 
     private ServerAdd() {
     }
-   
+
     @Override
     protected void populateModel(final ModelNode operation, final ModelNode model) throws OperationFailedException {
         ServerDefinition.SOCKET_BINDING_ATTR.validateAndSet(operation, model);
@@ -49,27 +50,28 @@ class ServerAdd extends AbstractAddStepHandler {
     }
 
     @Override
-    protected void performRuntime(final OperationContext context, 
-            final ModelNode operation, 
+    protected void performRuntime(final OperationContext context,
+            final ModelNode operation,
             final ModelNode model,
-            final ServiceVerificationHandler verificationHandler, 
+            final ServiceVerificationHandler verificationHandler,
             final List<ServiceController<?>> newControllers) throws OperationFailedException {
         final String factoryClass = ServerDefinition.FACTORY_CLASS_ATTR.resolveModelAttribute(context, model).asString();
         final String socketBinding = ServerDefinition.SOCKET_BINDING_ATTR.resolveModelAttribute(context, model).asString();
         final ModelNode threadFactoryNode = ServerDefinition.THREAD_FACTORY_ATTR.resolveModelAttribute(context, model);
-        
+
         final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         final NettyService nettyService = new NettyService(serverName, factoryClass);
-        
+
         final ServiceName name = NettyService.createServiceName(serverName);
         final ServiceBuilder<NettyService> sb = context.getServiceTarget().addService(name, nettyService);
         sb.addDependency(SocketBinding.JBOSS_BINDING_NAME.append(socketBinding), SocketBinding.class, nettyService.getInjectedSocketBinding());
         if (threadFactoryNode.isDefined()) {
             sb.addDependency(ThreadsServices.threadFactoryName(threadFactoryNode.asString()), ThreadFactory.class, nettyService.getInjectedThreadFactory());
         }
+        sb.addDependencies(JPAService.SERVICE_NAME);
         sb.addListener(verificationHandler);
         sb.setInitialMode(Mode.ACTIVE);
         newControllers.add(sb.install());
     }
-    
+
 }
