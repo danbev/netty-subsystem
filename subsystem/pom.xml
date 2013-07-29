@@ -31,11 +31,41 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <module.name>org.jboss.aerogear.netty</module.name>
+        <module.dir>${project.build.directory}/module/org/jboss/aerogear/netty/main</module.dir>
     </properties>
     
     <build>
-      <finalName>${project.artifactId}</finalName>
+      <finalName>${project.artifactId}-${version}</finalName>
       <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <outputDirectory>${module.dir}</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-module-xml</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${module.dir}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/module/main</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.1</version>
@@ -75,10 +105,12 @@
                       <goal>copy-dependencies</goal>
                     </goals>
                     <configuration>
-                      <outputDirectory>${project.build.directory}/deps</outputDirectory>
-                      <overWriteReleases>false</overWriteReleases>
-                      <overWriteSnapshots>false</overWriteSnapshots>
+                      <outputDirectory>${module.dir}</outputDirectory>
+                      <overWriteReleases>true</overWriteReleases>
+                      <overWriteSnapshots>true</overWriteSnapshots>
                       <overWriteIfNewer>true</overWriteIfNewer>
+                      <silent>true</silent>
+                      <includeArtifactIds>netty-all, netty-subsystem-api</includeArtifactIds>
                     </configuration>
                   </execution>
             </executions>
@@ -94,40 +126,6 @@
                         <descriptor>src/assemble/distribution.xml</descriptor>
                     </descriptors>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <inherited>false</inherited>
-                <version>1.6</version>
-                <executions>
-                    <execution>
-                        <id>build-dist</id>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                           <target>
-                               <!-- Replace the '.' in ${module.name} with '/' to get its path  -->
-                               <tempfile property="temp.file" />
-                               <echo message="${module.name}" file="${temp.file}" />
-                               <replace file="${temp.file}" token="." value="/" />
-                               <loadfile srcfile="${temp.file}" property="module.path" />
-                               <delete file="${temp.file}" />
-                               
-                               <delete dir="target/module" />
-                               <property name="module.dir" value="target/module/${module.path}/main" />
-                               
-                               <copy file="src/main/resources/module/main/module.xml" tofile="${module.dir}/module.xml" />
-                               <copy file="target/${project.artifactId}.jar" tofile="${module.dir}/${project.artifactId}-${project.version}.jar" />
-                               <copy file="target/deps/netty-subsystem-api-1.0.0-SNAPSHOT.jar" todir="${module.dir}" />
-                               <copy file="target/deps/netty-all-4.0.5.Final-SNAPSHOT.jar" todir="${module.dir}" />
-                              <echo>Module ${module.name} has been created in the target/module directory. Copy to your JBoss AS 7 installation.</echo>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
         <pluginManagement>
