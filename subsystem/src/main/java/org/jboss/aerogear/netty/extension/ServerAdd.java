@@ -20,16 +20,17 @@ package org.jboss.aerogear.netty.extension;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
+import org.jboss.as.connector.subsystems.datasources.DataSourceConfigService;
 import org.jboss.as.controller.AbstractAddStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
-import org.jboss.as.jpa.service.JPAService;
 import org.jboss.as.network.SocketBinding;
 import org.jboss.as.threads.ThreadsServices;
 import org.jboss.dmr.ModelNode;
+import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
@@ -38,6 +39,7 @@ import org.jboss.msc.service.ServiceName;
 class ServerAdd extends AbstractAddStepHandler {
 
     public static final ServerAdd INSTANCE = new ServerAdd();
+    private final Logger logger = Logger.getLogger(ServerAdd.class);
 
     private ServerAdd() {
     }
@@ -47,6 +49,7 @@ class ServerAdd extends AbstractAddStepHandler {
         ServerDefinition.SOCKET_BINDING_ATTR.validateAndSet(operation, model);
         ServerDefinition.FACTORY_CLASS_ATTR.validateAndSet(operation, model);
         ServerDefinition.THREAD_FACTORY_ATTR.validateAndSet(operation, model);
+        ServerDefinition.DATASOURCE_ATTR.validateAndSet(operation, model);
     }
 
     @Override
@@ -58,6 +61,7 @@ class ServerAdd extends AbstractAddStepHandler {
         final String factoryClass = ServerDefinition.FACTORY_CLASS_ATTR.resolveModelAttribute(context, model).asString();
         final String socketBinding = ServerDefinition.SOCKET_BINDING_ATTR.resolveModelAttribute(context, model).asString();
         final ModelNode threadFactoryNode = ServerDefinition.THREAD_FACTORY_ATTR.resolveModelAttribute(context, model);
+        final ModelNode datasourceNode = ServerDefinition.DATASOURCE_ATTR.resolveModelAttribute(context, model);
 
         final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         final NettyService nettyService = new NettyService(serverName, factoryClass);
@@ -65,10 +69,17 @@ class ServerAdd extends AbstractAddStepHandler {
         final ServiceName name = NettyService.createServiceName(serverName);
         final ServiceBuilder<NettyService> sb = context.getServiceTarget().addService(name, nettyService);
         sb.addDependency(SocketBinding.JBOSS_BINDING_NAME.append(socketBinding), SocketBinding.class, nettyService.getInjectedSocketBinding());
+
         if (threadFactoryNode.isDefined()) {
             sb.addDependency(ThreadsServices.threadFactoryName(threadFactoryNode.asString()), ThreadFactory.class, nettyService.getInjectedThreadFactory());
         }
-        sb.addDependencies(JPAService.SERVICE_NAME);
+
+        if (datasourceNode.isDefined()) {
+            final ServiceName dsServiceName = DataSourceConfigService.SERVICE_NAME_BASE.append(datasourceNode.asString());
+            logger.info("Adding dependency to [" + dsServiceName + "]");
+            sb.addDependencies(dsServiceName);
+        }
+
         sb.addListener(verificationHandler);
         sb.setInitialMode(Mode.ACTIVE);
         newControllers.add(sb.install());

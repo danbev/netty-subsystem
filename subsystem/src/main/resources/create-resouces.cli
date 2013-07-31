@@ -1,13 +1,13 @@
 # $WILDFLY_HOME/bin/jboss-cli.sh --file=/path/to/this/file.
 connect
 batch
+
+## Add Netty subsystem
 /extension=org.jboss.aerogear.netty:add
-/socket-binding-group=standard-sockets/socket-binding=simplepush:add(port=7777)
 
- /:composite(steps=[{"operation" => "add", "address" => [("subsystem" => "netty")]}, {"operation" => "add", "address" => [("subsystem" => "netty"), ("server" => "simplepush")], "socket-binding" => "simplepush", "factoryClass" => "org.jboss.aerogear.simplepush.netty.SimplePushBootstrapFactory"}]
-
-/subsystem=netty/netty:add(name="SimplePush", socket-binding="simplepush", factoryClass="org.jboss.aerogear.simplepush.netty.SimplePushBootstrapFactory")
-#/:composite(steps=[{"operation" => "add","address" => [("subsystem" => "netty")]}, {"operation" => "add", "address" => [("subsystem" => "netty/netty")]},  "name" => "jmx-connector-server", "registry-binding" => "jmx-connector-registry"}, {"operation" => "add", "address" => [("socket-binding-group" => "standard-sockets"), ("socket-binding" => "jmx-connector-registry")], "port" => 1090, "interface" => "management"}, {"operation" => "add", "address" => [("socket-binding-group" => "standard-sockets"), ("socket-binding" => "jmx-connector-server")], "port" => 1091, "interface" => "management"}])
+## Add a Netty Service
+/socket-binding-group=standard-sockets/socket-binding=myService:add(port=7777)
+/:composite(steps=[{"operation" => "add", "address" => [("subsystem" => "netty")]}, {"operation" => "add", "address" => [("subsystem" => "netty"), ("server" => "myService")], "socket-binding" => "myService", "factory-class" => "org.xyz.MyServiceBootstrapFactory"}]
 
 run-batch
 #:reload

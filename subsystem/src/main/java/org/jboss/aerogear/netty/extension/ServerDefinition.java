@@ -29,24 +29,25 @@ import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelType;
 
 public class ServerDefinition extends SimpleResourceDefinition {
-    
+
     public enum Element {
         UNKNOWN(null),
         SOCKET_BINDING("socket-binding"),
         THREAD_FACTORY("thread-factory"),
         FACTORY_CLASS("factory-class"),
+        DATASOURCE("datasource"),
         NAME("name");
-        
+
         private final String name;
-        
+
         private Element(final String name) {
             this.name = name;
         }
-        
+
         public String localName() {
             return name;
         }
-        
+
         private static final Map<String, Element> MAP;
 
         static {
@@ -62,13 +63,14 @@ public class ServerDefinition extends SimpleResourceDefinition {
             final Element element = MAP.get(localName);
             return element == null ? UNKNOWN : element;
         }
-        
+
     }
-    
+
     protected static final SimpleAttributeDefinition SOCKET_BINDING_ATTR = new SimpleAttributeDefinition(Element.SOCKET_BINDING.localName(), ModelType.STRING, false);
     protected static final SimpleAttributeDefinition FACTORY_CLASS_ATTR = new SimpleAttributeDefinition(Element.FACTORY_CLASS.localName(), ModelType.STRING, false);
     protected static final SimpleAttributeDefinition THREAD_FACTORY_ATTR = new SimpleAttributeDefinition(Element.THREAD_FACTORY.localName(), ModelType.STRING, true);
-    
+    protected static final SimpleAttributeDefinition DATASOURCE_ATTR = new SimpleAttributeDefinition(Element.DATASOURCE.localName(), ModelType.STRING, true);
+
     public static final ServerDefinition INSTANCE = new ServerDefinition();
 
     private ServerDefinition() {
@@ -83,5 +85,6 @@ public class ServerDefinition extends SimpleResourceDefinition {
         resourceRegistration.registerReadWriteAttribute(SOCKET_BINDING_ATTR, null, NettySocketBindingHandler.INSTANCE);
         resourceRegistration.registerReadWriteAttribute(FACTORY_CLASS_ATTR, null, NettySocketBindingHandler.INSTANCE);
         resourceRegistration.registerReadWriteAttribute(THREAD_FACTORY_ATTR, null, NettySocketBindingHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(DATASOURCE_ATTR, null, NettySocketBindingHandler.INSTANCE);
     }
 }

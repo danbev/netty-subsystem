@@ -47,7 +47,7 @@ public class NettySubsystemParser implements XMLStreamConstants, XMLElementReade
         final ModelNode address = new ModelNode();
         address.add(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME);
         address.protect();
-        
+
         final ModelNode subsystem = new ModelNode();
         subsystem.get(OP).set(ADD);
         subsystem.get(OP_ADDR).set(address);
@@ -61,7 +61,7 @@ public class NettySubsystemParser implements XMLStreamConstants, XMLElementReade
     private void readServerType(final XMLExtendedStreamReader reader, final List<ModelNode> list) throws XMLStreamException {
         final ModelNode addServerOperation = new ModelNode();
         addServerOperation.get(OP).set(ModelDescriptionConstants.ADD);
-        
+
         final int count = reader.getAttributeCount();
         for (int i = 0; i < count; i++) {
             final String name = reader.getAttributeLocalName(i);
@@ -75,6 +75,9 @@ public class NettySubsystemParser implements XMLStreamConstants, XMLElementReade
                 break;
             case THREAD_FACTORY:
                 ServerDefinition.THREAD_FACTORY_ATTR.parseAndSetParameter(value, addServerOperation, reader);
+                break;
+            case DATASOURCE:
+                ServerDefinition.DATASOURCE_ATTR.parseAndSetParameter(value, addServerOperation, reader);
                 break;
             case NAME:
                 if (value == null) {
@@ -106,6 +109,7 @@ public class NettySubsystemParser implements XMLStreamConstants, XMLElementReade
             ServerDefinition.SOCKET_BINDING_ATTR.marshallAsAttribute(entry, true, writer);
             ServerDefinition.FACTORY_CLASS_ATTR.marshallAsAttribute(entry, true, writer);
             ServerDefinition.THREAD_FACTORY_ATTR.marshallAsAttribute(entry, true, writer);
+            ServerDefinition.DATASOURCE_ATTR.marshallAsAttribute(entry, true, writer);
             writer.writeEndElement();
         }
         writer.writeEndElement();

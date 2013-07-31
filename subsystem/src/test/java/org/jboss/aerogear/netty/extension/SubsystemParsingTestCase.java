@@ -28,9 +28,12 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OUTCOME;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUCCESS;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
+import org.jboss.as.connector.subsystems.datasources.DataSourceConfigService;
+import org.jboss.as.connector.subsystems.datasources.ModifiableDataSource;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.PathElement;
 import org.jboss.as.jpa.service.JPAService;
@@ -41,6 +44,7 @@ import org.jboss.as.subsystem.test.KernelServices;
 import org.jboss.as.threads.ThreadFactoryService;
 import org.jboss.as.threads.ThreadsServices;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceNotFoundException;
 import org.jboss.msc.service.ServiceTarget;
@@ -50,7 +54,8 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
     private final String subsystemXml =
         "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
-            "<server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" factory-class=\"" + MockServerBootstrapFactory.class.getName() + "\"/>" +
+            "<server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" " +
+                "factory-class=\"" + MockServerBootstrapFactory.class.getName() + "\" datasource=\"TestDS\"/>" +
         "</subsystem>";
 
     public SubsystemParsingTestCase() {
@@ -103,6 +108,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "socket-binding").asString(), is("simplepush"));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "factory-class").asString(), is(MockServerBootstrapFactory.class.getName()));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "thread-factory").asString(), is("netty-thread-factory"));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "datasource").asString(), is("TestDS"));
     }
 
     @Test
@@ -157,6 +163,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         addOp.get("socket-binding").set("mysocket");
         addOp.get("factory-class").set(MockServerBootstrapFactory.class.getName());
         addOp.get("thread-factory").set("netty-thread-factory");
+        addOp.get("datasource").set("NettyDS");
         final ModelNode result = services.executeOperation(addOp);
         assertThat(result.get(OUTCOME).asString(), equalTo(SUCCESS));
 
@@ -166,11 +173,13 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("simplepush"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("socket-binding"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "socket-binding").asString(), is("simplepush"));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "datasource").asString(), is("TestDS"));
 
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("foo"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo").hasDefined("socket-binding"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "socket-binding").asString(), is("mysocket"));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "thread-factory").asString(), is("netty-thread-factory"));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "datasource").asString(), is("NettyDS"));
     }
 
     private static class AdditionalServices extends AdditionalInitialization {
@@ -191,9 +200,11 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
             final ServiceBuilder<?> serviceBuilder = serviceTarget.addService(ThreadsServices.threadFactoryName("netty-thread-factory"), threadFactoryService);
             serviceBuilder.install();
 
-            JPAService jpaService = new JPAService();
-            final ServiceBuilder<?> jpasb = serviceTarget.addService(JPAService.SERVICE_NAME, jpaService);
-            jpasb.install();
+            final Service<?> ds = mock(Service.class);
+            final ServiceBuilder<?> testDS = serviceTarget.addService(DataSourceConfigService.SERVICE_NAME_BASE.append("TestDS"), ds);
+            testDS.install();
+            final ServiceBuilder<?> nettyDS = serviceTarget.addService(DataSourceConfigService.SERVICE_NAME_BASE.append("NettyDS"), ds);
+            nettyDS.install();
         }
     }
 }
