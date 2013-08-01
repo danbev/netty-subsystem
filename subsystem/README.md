@@ -53,7 +53,7 @@ As an example, add the following elements to _$WILDFLYHOME/standalone/configurat
     <profile>
         ...
         <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
-            <server name="simplepush-server" socket-binding="simplepush" factoryClass="org.xyz.CustomBootstrapFactory" 
+            <server name="simplepush-server" socket-binding="simplepush" factory-class="org.xyz.CustomBootstrapFactory" 
                 thread-factory="netty-thread-factory" datasource="TestDS"/>
             ...
         </subsystem>
@@ -67,7 +67,7 @@ This is a simple name to identify the server in logs etc.
 __socket-binding__  
 The socket-binding to be used for this Netty server instance. 
 
-__factoryClass__  
+__factory-class__  
 This is a class that implements _org.jboss.aerogear.netty.extension.api.ServerBootstrapFactory_ and is responsible for 
 creating a [ServerBootstrap](http://netty.io/4.0/api/io/netty/bootstrap/ServerBootstrap.html). This allows the end user to
 configure the Netty server application with the appropriate _Channel_, _ChannelPipeline_ etc. The sole method, 
