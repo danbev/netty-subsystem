@@ -39,13 +39,13 @@ As an example, add the following elements to _$WILDFLYHOME/standalone/configurat
     
     <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
         ...
-        <socket-binding name="simplepush" port="7777"/>
+        <socket-binding name="my-socket-binding" port="7999"/>
     </socket-binding-group>  
     
 #### Add a thread-factory    
 
     <subsystem xmlns="urn:jboss:domain:threads:1.1">
-        <thread-factory name="netty-thread-factory" group-name="netty-thread-group" thread-name-pattern="%i" priority="5"/>
+        <thread-factory name="my-thread-factory" group-name="netty-thread-group" thread-name-pattern="%i" priority="5"/>
     </subsystem>
 
 #### Add the Netty subsystem
@@ -53,8 +53,8 @@ As an example, add the following elements to _$WILDFLYHOME/standalone/configurat
     <profile>
         ...
         <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
-            <server name="simplepush-server" socket-binding="simplepush" factory-class="org.xyz.CustomBootstrapFactory" 
-                thread-factory="netty-thread-factory" datasource="TestDS"/>
+            <server name="my-server" socket-binding="my-socket-binding" factory-class="org.xyz.MyServerBootstrapFactory" 
+                thread-factory="my-thread-factory" datasource="MyServerDS"/>
             ...
         </subsystem>
     </profile>    
