@@ -32,11 +32,14 @@ import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
+import org.jboss.as.connector.subsystems.datasources.AbstractDataSourceService;
 import org.jboss.as.connector.subsystems.datasources.DataSourceConfigService;
 import org.jboss.as.connector.subsystems.datasources.ModifiableDataSource;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.PathElement;
 import org.jboss.as.jpa.service.JPAService;
+import org.jboss.as.naming.deployment.ContextNames;
+import org.jboss.as.naming.deployment.ContextNames.BindInfo;
 import org.jboss.as.subsystem.test.AbstractSubsystemTest;
 import org.jboss.as.subsystem.test.AdditionalInitialization;
 import org.jboss.as.subsystem.test.ControllerInitializer;
@@ -55,7 +58,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     private final String subsystemXml =
         "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
             "<server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" " +
-                "factory-class=\"" + MockServerBootstrapFactory.class.getName() + "\" datasource=\"TestDS\"/>" +
+                "factory-class=\"" + MockServerBootstrapFactory.class.getName() + "\" datasource-jndi-name=\"java:jboss/datasources/TestDS\"/>" +
         "</subsystem>";
 
     public SubsystemParsingTestCase() {
@@ -80,7 +83,6 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         final List<ModelNode> operations = super.parse(subsystemXml);
         assertThat(operations.size(), is(2));
         final ModelNode addType = operations.get(1);
-        System.out.println(addType);
         assertThat(addType.get(OP).asString(), equalTo(ADD));
         assertThat(addType.get(ServerDefinition.Element.SOCKET_BINDING.localName()).asString(), is("simplepush"));
         assertThat(addType.get(ServerDefinition.Element.FACTORY_CLASS.localName()).asString(), equalTo(MockServerBootstrapFactory.class.getName()));
@@ -108,7 +110,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "socket-binding").asString(), is("simplepush"));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "factory-class").asString(), is(MockServerBootstrapFactory.class.getName()));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "thread-factory").asString(), is("netty-thread-factory"));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "datasource").asString(), is("TestDS"));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "datasource-jndi-name").asString(), is("java:jboss/datasources/TestDS"));
     }
 
     @Test
@@ -163,7 +165,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         addOp.get("socket-binding").set("mysocket");
         addOp.get("factory-class").set(MockServerBootstrapFactory.class.getName());
         addOp.get("thread-factory").set("netty-thread-factory");
-        addOp.get("datasource").set("NettyDS");
+        addOp.get("datasource-jndi-name").set("java:jboss/datasources/NettyDS");
         final ModelNode result = services.executeOperation(addOp);
         assertThat(result.get(OUTCOME).asString(), equalTo(SUCCESS));
 
@@ -173,13 +175,13 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("simplepush"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush").hasDefined("socket-binding"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "socket-binding").asString(), is("simplepush"));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "datasource").asString(), is("TestDS"));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "datasource-jndi-name").asString(), is("java:jboss/datasources/TestDS"));
 
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server").hasDefined("foo"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo").hasDefined("socket-binding"), is(true));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "socket-binding").asString(), is("mysocket"));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "thread-factory").asString(), is("netty-thread-factory"));
-        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "datasource").asString(), is("NettyDS"));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "foo", "datasource-jndi-name").asString(), is("java:jboss/datasources/NettyDS"));
     }
 
     private static class AdditionalServices extends AdditionalInitialization {
@@ -201,9 +203,11 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
             serviceBuilder.install();
 
             final Service<?> ds = mock(Service.class);
-            final ServiceBuilder<?> testDS = serviceTarget.addService(DataSourceConfigService.SERVICE_NAME_BASE.append("TestDS"), ds);
+            final BindInfo testBindInfo = ContextNames.bindInfoFor("java:jboss/datasources/TestDS");
+            final ServiceBuilder<?> testDS = serviceTarget.addService(testBindInfo.getBinderServiceName(), ds);
             testDS.install();
-            final ServiceBuilder<?> nettyDS = serviceTarget.addService(DataSourceConfigService.SERVICE_NAME_BASE.append("NettyDS"), ds);
+            final BindInfo nettyBindInfo = ContextNames.bindInfoFor("java:jboss/datasources/NettyDS");
+            final ServiceBuilder<?> nettyDS = serviceTarget.addService(nettyBindInfo.getBinderServiceName(), ds);
             nettyDS.install();
         }
     }

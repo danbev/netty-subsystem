@@ -1,3 +1,3 @@
 <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
-    <server name="simplepush-server" thread-factory="netty" socket-binding="simplepush" factory-class="org.jboss.aerogear.netty.extension.SimplePushChannelInitializer" datasource="TestDS"/>
+    <server name="simplepush-server" thread-factory="netty" socket-binding="simplepush" factory-class="org.jboss.aerogear.netty.extension.SimplePushChannelInitializer" datasource-jndi-name="TestDS"/>
 </subsystem>

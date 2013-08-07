@@ -54,7 +54,7 @@ As an example, add the following elements to _$WILDFLYHOME/standalone/configurat
         ...
         <subsystem xmlns="urn:org.jboss.aerogear.netty:1.0">
             <server name="my-server" socket-binding="my-socket-binding" factory-class="org.xyz.MyServerBootstrapFactory" 
-                thread-factory="my-thread-factory" datasource="MyServerDS"/>
+                thread-factory="my-thread-factory" datasource-jndi-name="MyServerDS"/>
             ...
         </subsystem>
     </profile>    
@@ -83,8 +83,8 @@ see the [subsystem-api](https://github.com/danbev/netty-subsystem/tree/master/su
 __thread-factory__  
 Thread factory that will be passed along to Netty when creating.
 
-__datasource__  
-An optional datasource that this service depends on.
+__datasource-jndi-name__  
+An optional datasource JNDI name that this service depends on.
     
 ## References
 * [simplepush-server-wildfly](https://github.com/danbev/aerogear-simplepush-server/tree/master/wildfly-module)

@@ -20,6 +20,7 @@ package org.jboss.aerogear.netty.extension;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
+import org.jboss.as.connector.subsystems.datasources.AbstractDataSourceService;
 import org.jboss.as.connector.subsystems.datasources.DataSourceConfigService;
 import org.jboss.as.controller.AbstractAddStepHandler;
 import org.jboss.as.controller.OperationContext;
@@ -27,6 +28,8 @@ import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
+import org.jboss.as.naming.deployment.ContextNames;
+import org.jboss.as.naming.deployment.ContextNames.BindInfo;
 import org.jboss.as.network.SocketBinding;
 import org.jboss.as.threads.ThreadsServices;
 import org.jboss.dmr.ModelNode;
@@ -75,9 +78,9 @@ class ServerAdd extends AbstractAddStepHandler {
         }
 
         if (datasourceNode.isDefined()) {
-            final ServiceName dsServiceName = DataSourceConfigService.SERVICE_NAME_BASE.append(datasourceNode.asString());
-            logger.info("Adding dependency to [" + dsServiceName + "]");
-            sb.addDependencies(dsServiceName);
+            final BindInfo bindinfo = ContextNames.bindInfoFor(datasourceNode.asString());
+            logger.info("Adding dependency to [" + bindinfo.getAbsoluteJndiName() + "]");
+            sb.addDependencies(bindinfo.getBinderServiceName());
         }
 
         sb.addListener(verificationHandler);

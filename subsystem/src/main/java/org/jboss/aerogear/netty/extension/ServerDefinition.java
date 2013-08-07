@@ -35,7 +35,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
         SOCKET_BINDING("socket-binding"),
         THREAD_FACTORY("thread-factory"),
         FACTORY_CLASS("factory-class"),
-        DATASOURCE("datasource"),
+        DATASOURCE("datasource-jndi-name"),
         NAME("name");
 
         private final String name;
