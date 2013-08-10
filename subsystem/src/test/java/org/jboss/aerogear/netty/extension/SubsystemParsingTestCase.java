@@ -58,7 +58,8 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     private final String subsystemXml =
         "<subsystem xmlns=\"" + NettyExtension.NAMESPACE + "\">" +
             "<server name=\"simplepush\" socket-binding=\"simplepush\" thread-factory=\"netty-thread-factory\" " +
-                "factory-class=\"" + MockServerBootstrapFactory.class.getName() + "\" datasource-jndi-name=\"java:jboss/datasources/TestDS\"/>" +
+                "factory-class=\"" + MockServerBootstrapFactory.class.getName() +
+                "\" datasource-jndi-name=\"java:jboss/datasources/TestDS\" token-key=\"testing\"/>" +
         "</subsystem>";
 
     public SubsystemParsingTestCase() {
@@ -111,6 +112,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "factory-class").asString(), is(MockServerBootstrapFactory.class.getName()));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "thread-factory").asString(), is("netty-thread-factory"));
         assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "datasource-jndi-name").asString(), is("java:jboss/datasources/TestDS"));
+        assertThat(model.get(SUBSYSTEM, NettyExtension.SUBSYSTEM_NAME, "server", "simplepush", "token-key").asString(), is("testing"));
     }
 
     @Test

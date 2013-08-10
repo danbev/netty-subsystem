@@ -36,6 +36,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
         THREAD_FACTORY("thread-factory"),
         FACTORY_CLASS("factory-class"),
         DATASOURCE("datasource-jndi-name"),
+        TOKEN_KEY("token-key"),
         NAME("name");
 
         private final String name;
@@ -70,6 +71,7 @@ public class ServerDefinition extends SimpleResourceDefinition {
     protected static final SimpleAttributeDefinition FACTORY_CLASS_ATTR = new SimpleAttributeDefinition(Element.FACTORY_CLASS.localName(), ModelType.STRING, false);
     protected static final SimpleAttributeDefinition THREAD_FACTORY_ATTR = new SimpleAttributeDefinition(Element.THREAD_FACTORY.localName(), ModelType.STRING, true);
     protected static final SimpleAttributeDefinition DATASOURCE_ATTR = new SimpleAttributeDefinition(Element.DATASOURCE.localName(), ModelType.STRING, true);
+    protected static final SimpleAttributeDefinition TOKEN_KEY_ATTR = new SimpleAttributeDefinition(Element.TOKEN_KEY.localName(), ModelType.STRING, true);
 
     public static final ServerDefinition INSTANCE = new ServerDefinition();
 
@@ -86,5 +88,6 @@ public class ServerDefinition extends SimpleResourceDefinition {
         resourceRegistration.registerReadWriteAttribute(FACTORY_CLASS_ATTR, null, NettySocketBindingHandler.INSTANCE);
         resourceRegistration.registerReadWriteAttribute(THREAD_FACTORY_ATTR, null, NettySocketBindingHandler.INSTANCE);
         resourceRegistration.registerReadWriteAttribute(DATASOURCE_ATTR, null, NettySocketBindingHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(TOKEN_KEY_ATTR, null, NettySocketBindingHandler.INSTANCE);
     }
 }

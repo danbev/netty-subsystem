@@ -79,6 +79,9 @@ public class NettySubsystemParser implements XMLStreamConstants, XMLElementReade
             case DATASOURCE:
                 ServerDefinition.DATASOURCE_ATTR.parseAndSetParameter(value, addServerOperation, reader);
                 break;
+            case TOKEN_KEY:
+                ServerDefinition.TOKEN_KEY_ATTR.parseAndSetParameter(value, addServerOperation, reader);
+                break;
             case NAME:
                 if (value == null) {
                     throw ParseUtils.missingRequiredElement(reader, Collections.singleton(ServerDefinition.Element.NAME.toString()));
@@ -110,6 +113,7 @@ public class NettySubsystemParser implements XMLStreamConstants, XMLElementReade
             ServerDefinition.FACTORY_CLASS_ATTR.marshallAsAttribute(entry, true, writer);
             ServerDefinition.THREAD_FACTORY_ATTR.marshallAsAttribute(entry, true, writer);
             ServerDefinition.DATASOURCE_ATTR.marshallAsAttribute(entry, true, writer);
+            ServerDefinition.TOKEN_KEY_ATTR.marshallAsAttribute(entry, true, writer);
             writer.writeEndElement();
         }
         writer.writeEndElement();

@@ -53,6 +53,7 @@ class ServerAdd extends AbstractAddStepHandler {
         ServerDefinition.FACTORY_CLASS_ATTR.validateAndSet(operation, model);
         ServerDefinition.THREAD_FACTORY_ATTR.validateAndSet(operation, model);
         ServerDefinition.DATASOURCE_ATTR.validateAndSet(operation, model);
+        ServerDefinition.TOKEN_KEY_ATTR.validateAndSet(operation, model);
     }
 
     @Override
@@ -67,7 +68,8 @@ class ServerAdd extends AbstractAddStepHandler {
         final ModelNode datasourceNode = ServerDefinition.DATASOURCE_ATTR.resolveModelAttribute(context, model);
 
         final String serverName = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        final NettyService nettyService = new NettyService(serverName, factoryClass);
+        final String tokenKey = ServerDefinition.TOKEN_KEY_ATTR.resolveModelAttribute(context, model).asString();
+        final NettyService nettyService = new NettyService(serverName, factoryClass, tokenKey);
 
         final ServiceName name = NettyService.createServiceName(serverName);
         final ServiceBuilder<NettyService> sb = context.getServiceTarget().addService(name, nettyService);

@@ -40,13 +40,16 @@ public class NettyService implements Service<NettyService> {
     private final InjectedValue<ThreadFactory> injectedThreadFactory = new InjectedValue<ThreadFactory>();
     private final String name;
     private final String factoryClass;
+    private final String tokenKey;
     private Channel channel;
-    
-    public NettyService(final String name, final String factoryClass) {
+
+
+    public NettyService(final String name, final String factoryClass, final String tokenKey) {
         this.name = name;
         this.factoryClass = factoryClass;
+        this.tokenKey = tokenKey;
     }
-    
+
     @Override
     public synchronized  void start(final StartContext context) throws StartException {
         try {
@@ -59,14 +62,14 @@ public class NettyService implements Service<NettyService> {
             throw new StartException(e);
         }
     }
-    
-    private ServerBootstrap createServerBootstrap(final String factoryClass, 
+
+    private ServerBootstrap createServerBootstrap(final String factoryClass,
             final SocketBinding socketBinding,
             final ThreadFactory threadFactory) throws StartException {
         try {
             final Class<?> type = Class.forName(factoryClass);
             final ServerBootstrapFactory factory = (ServerBootstrapFactory) type.newInstance();
-            return factory.createServerBootstrap(socketBinding, threadFactory);
+            return factory.createServerBootstrap(socketBinding, threadFactory, tokenKey);
         } catch (final Exception e) {
             throw new StartException(e.getMessage(), e);
         }
@@ -77,15 +80,15 @@ public class NettyService implements Service<NettyService> {
         logger.info("NettyService [" + name + "] shutting down.");
         channel.eventLoop().shutdownGracefully();
     }
-    
+
     public InjectedValue<SocketBinding> getInjectedSocketBinding() {
         return injectedSocketBinding;
     }
-    
+
     public InjectedValue<ThreadFactory> getInjectedThreadFactory() {
         return injectedThreadFactory;
     }
-    
+
     @Override
     public NettyService getValue() throws IllegalStateException, IllegalArgumentException {
         return this;

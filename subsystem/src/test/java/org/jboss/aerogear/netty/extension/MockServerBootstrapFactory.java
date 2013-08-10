@@ -32,7 +32,9 @@ import org.jboss.as.network.SocketBinding;
 public class MockServerBootstrapFactory implements ServerBootstrapFactory {
 
     @Override
-    public ServerBootstrap createServerBootstrap(final SocketBinding socketBinding, final ThreadFactory threadFactory) {
+    public ServerBootstrap createServerBootstrap(final SocketBinding socketBinding,
+            final ThreadFactory threadFactory,
+            final String tokenKey) {
         final EventLoopGroup bossGroup = new NioEventLoopGroup();
         final EventLoopGroup workerGroup = new NioEventLoopGroup();
         final ServerBootstrap sb = new ServerBootstrap();
