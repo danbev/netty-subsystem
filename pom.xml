@@ -21,7 +21,7 @@
   <groupId>org.jboss.aerogear</groupId>
   <artifactId>netty-extension-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>0.8.0-SNAPSHOT</version>
 
   <name>AeroGear Netty Susbystem/Extension for WildFly</name>
   <url>http://aerogear.org/</url>
